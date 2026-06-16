@@ -249,3 +249,40 @@ Return ONLY the JSON object, no other text."""
             'duplicates': 0,
             'errors': 0,
         }
+
+
+def clean_judgment_text(raw_text):
+    """Standalone function to clean judgment text (for testing)."""
+    # Remove multiple spaces
+    text = re.sub(r'\s+', ' ', raw_text)
+    # Remove common boilerplate
+    boilerplate_patterns = [
+        r'(Printed and published by|Percetakan Negara Malaysia)',
+        r'(^ENDORSED.*?^$)',
+    ]
+    for pattern in boilerplate_patterns:
+        text = re.sub(pattern, '', text, flags=re.MULTILINE | re.IGNORECASE)
+    return text.strip()
+
+
+def extract_citations_from_text(text):
+    """Extract citation patterns from judgment text (for testing)."""
+    # Pattern for Malaysian citations like [2024] 3 CLJ 101
+    pattern = r'\[\d{4}\]\s+\d+\s+(?:CLJ|MLJ|MLRA|AMR|MELR)\s+\d+'
+    citations = re.findall(pattern, text)
+    return citations
+
+
+def should_skip_judgment(judgment_data):
+    """Check if judgment should be skipped due to deduplication (for testing)."""
+    citation = judgment_data.get('citation')
+    court_level = judgment_data.get('court_level')
+
+    if not citation or not court_level:
+        return False
+
+    existing = Judgment.query.filter_by(
+        citation=citation,
+        court_level=court_level
+    ).first()
+    return existing is not None

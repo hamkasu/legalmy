@@ -1,5 +1,6 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
+from sqlalchemy import text
 import logging
 from logging.handlers import RotatingFileHandler
 import os
@@ -32,17 +33,41 @@ def create_app(config_name=None):
     # CLI commands
     register_cli_commands(app)
 
-    # Create tables and run migrations
-    with app.app_context():
-        # Health check endpoint
-        @app.route('/health')
-        def health():
-            return jsonify({
-                'status': 'ok',
-                'db': 'ok',
-                'redis': 'ok',
-                'version': '1.0.0'
-            }), 200
+    # Health check endpoint
+    @app.route('/health')
+    def health():
+        """Health check endpoint - verifies DB and Redis connectivity."""
+        health_status = {
+            'status': 'ok',
+            'db': 'unknown',
+            'redis': 'unknown',
+            'version': '1.0.0'
+        }
+
+        # Check database
+        try:
+            db.session.execute(text('SELECT 1'))
+            health_status['db'] = 'ok'
+        except Exception as e:
+            health_status['db'] = f'error: {str(e)}'
+            health_status['status'] = 'degraded'
+
+        # Check Redis
+        try:
+            import redis
+            redis_url = os.environ.get('REDIS_URL')
+            if redis_url:
+                r = redis.from_url(redis_url)
+                r.ping()
+                health_status['redis'] = 'ok'
+            else:
+                health_status['redis'] = 'not_configured'
+        except Exception as e:
+            health_status['redis'] = f'error: {str(e)}'
+            health_status['status'] = 'degraded'
+
+        status_code = 200 if health_status['status'] == 'ok' else 503
+        return jsonify(health_status), status_code
 
     return app
 
