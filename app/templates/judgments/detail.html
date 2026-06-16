@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}{{ judgment.citation }} - LegalMY{% endblock %}
+
+{% block content %}
+<div style="padding: 40px 0;">
+    <div class="container" style="max-width: 1000px;">
+        <!-- Judgment Header -->
+        <div style="margin-bottom: 40px;">
+            <h1 style="font-family: 'Merriweather', serif; color: #0D1B2A; margin-bottom: 10px;">{{ judgment.citation }}</h1>
+            <p style="color: #64748B; font-size: 1.1rem; margin-bottom: 20px;">{{ judgment.title }}</p>
+
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px;">
+                <div style="background: white; padding: 15px; border-radius: 4px; border-left: 4px solid #B8973A;">
+                    <div style="color: #64748B; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Court</div>
+                    <div style="color: #0D1B2A; font-weight: 600; margin-top: 5px;">{{ judgment.court_level.value }}</div>
+                    <div style="color: #64748B; font-size: 0.85rem; margin-top: 2px;">{{ judgment.court_location }}</div>
+                </div>
+                <div style="background: white; padding: 15px; border-radius: 4px; border-left: 4px solid #B8973A;">
+                    <div style="color: #64748B; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Date</div>
+                    <div style="color: #0D1B2A; font-weight: 600; margin-top: 5px;">
+                        {% if judgment.date_decided %}{{ judgment.date_decided.strftime('%d %b %Y') }}{% else %}N/A{% endif %}
+                    </div>
+                </div>
+                <div style="background: white; padding: 15px; border-radius: 4px; border-left: 4px solid #B8973A;">
+                    <div style="color: #64748B; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Outcome</div>
+                    <div style="color: #0D1B2A; font-weight: 600; margin-top: 5px;">
+                        {% if judgment.outcome %}
+                            {% if judgment.outcome.value == 'allowed' %}
+                                <span style="background: #DCFCE7; color: #166534; padding: 4px 8px; border-radius: 3px; font-size: 0.85rem;">Allowed</span>
+                            {% elif judgment.outcome.value == 'dismissed' %}
+                                <span style="background: #FEE2E2; color: #991B1B; padding: 4px 8px; border-radius: 3px; font-size: 0.85rem;">Dismissed</span>
+                            {% else %}
+                                <span style="background: #F3F4F6; color: #374151; padding: 4px 8px; border-radius: 3px; font-size: 0.85rem;">{{ judgment.outcome.value | title }}</span>
+                            {% endif %}
+                        {% else %}
+                            <span style="color: #9CA3AF;">N/A</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div style="background: white; padding: 15px; border-radius: 4px; border-left: 4px solid #B8973A;">
+                    <div style="color: #64748B; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Citations</div>
+                    <div style="color: #0D1B2A; font-weight: 600; margin-top: 5px; font-size: 1.3rem;">{{ judgment.citation_count }}</div>
+                    <div style="color: #64748B; font-size: 0.85rem; margin-top: 2px;">times cited</div>
+                </div>
+            </div>
+
+            <!-- Summary -->
+            {% if judgment.summary_ai %}
+            <div style="background: #F3F4F6; padding: 20px; border-radius: 8px; border-left: 4px solid #B8973A; margin-bottom: 30px;">
+                <h3 style="color: #0D1B2A; margin-bottom: 10px; font-weight: bold;">Summary</h3>
+                <p style="color: #64748B; line-height: 1.8; margin: 0;">{{ judgment.summary_ai }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Full Text -->
+            <div style="background: white; padding: 30px; border-radius: 8px; margin-bottom: 30px;">
+                <h2 style="color: #0D1B2A; margin-bottom: 20px; font-weight: bold;">Full Text</h2>
+                <div style="color: #64748B; line-height: 1.8; font-family: 'Courier New', monospace; font-size: 0.9rem; max-height: 600px; overflow-y: auto; padding: 20px; background: #f9fafb; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word;">{{ judgment.full_text[:2000] }}...</div>
+            </div>
+
+            <!-- Citation Graph Preview -->
+            <div style="background: white; padding: 30px; border-radius: 8px; margin-bottom: 30px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="color: #0D1B2A; margin: 0; font-weight: bold;">Citation Graph</h2>
+                    <a href="/judgments/{{ judgment.id }}/graph" style="background: #B8973A; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: 600; font-size: 0.85rem;">View Full Graph</a>
+                </div>
+                <p style="color: #64748B; font-size: 0.9rem; margin-bottom: 15px;">Cases that cite or are cited by this judgment (showing 1 hop)</p>
+                <svg id="previewGraphSvg" style="width: 100%; height: 400px; background: #f9fafb; border-radius: 4px;"></svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+const focalId = '{{ judgment.id }}';
+
+async function loadPreviewGraph() {
+    try {
+        const response = await fetch(`/judgments/api/citations/${focalId}/graph?depth=1`);
+        const graphData = await response.json();
+        renderPreviewGraph(graphData);
+    } catch (error) {
+        console.error('Failed to load graph:', error);
+    }
+}
+
+function renderPreviewGraph(graphData) {
+    const width = document.getElementById('previewGraphSvg').clientWidth;
+    const height = 400;
+
+    d3.select('#previewGraphSvg').selectAll('*').remove();
+
+    const svg = d3.select('#previewGraphSvg');
+    const g = svg.append('g');
+
+    // Simple zoom
+    const zoom = d3.zoom().on('zoom', (event) => {
+        g.attr('transform', event.transform);
+    });
+    svg.call(zoom);
+
+    // Force simulation
+    const simulation = d3.forceSimulation(graphData.nodes)
+        .force('link', d3.forceLink(graphData.edges)
+            .id(d => d.id)
+            .distance(80))
+        .force('charge', d3.forceManyBody().strength(-250))
+        .force('center', d3.forceCenter(width / 2, height / 2))
+        .force('collision', d3.forceCollide().radius(d => d.radius + 8));
+
+    // Links
+    const link = g.selectAll('line')
+        .data(graphData.edges)
+        .enter().append('line')
+        .attr('stroke', d => d.color)
+        .attr('stroke-width', 2)
+        .attr('marker-end', 'url(#arrowheadPreview)');
+
+    svg.append('defs').append('marker')
+        .attr('id', 'arrowheadPreview')
+        .attr('markerWidth', 10)
+        .attr('markerHeight', 10)
+        .attr('refX', 15)
+        .attr('refY', 3)
+        .attr('orient', 'auto')
+        .append('polygon')
+        .attr('points', '0 0, 10 3, 0 6')
+        .attr('fill', '#9CA3AF');
+
+    // Nodes
+    const node = g.selectAll('circle')
+        .data(graphData.nodes)
+        .enter().append('circle')
+        .attr('r', d => d.radius)
+        .attr('fill', d => d.color)
+        .attr('stroke', d => d.is_focal ? d.color : 'white')
+        .attr('stroke-width', d => d.is_focal ? 4 : 2)
+        .style('cursor', 'pointer')
+        .on('click', (event, d) => {
+            window.location.href = `/judgments/${d.id}/graph`;
+        });
+
+    // Labels
+    const labels = g.selectAll('text')
+        .data(graphData.nodes)
+        .enter().append('text')
+        .attr('text-anchor', 'middle')
+        .attr('dy', '.35em')
+        .attr('font-size', '10px')
+        .attr('fill', 'white')
+        .attr('font-weight', 'bold')
+        .attr('pointer-events', 'none')
+        .text(d => {
+            const parts = d.label.split(' ');
+            return parts.slice(0, 2).join(' ');
+        });
+
+    // Tooltips
+    node.append('title')
+        .text(d => `${d.label}\n${d.title}`);
+
+    // Update on tick
+    simulation.on('tick', () => {
+        link
+            .attr('x1', d => d.source.x)
+            .attr('y1', d => d.source.y)
+            .attr('x2', d => d.target.x)
+            .attr('y2', d => d.target.y);
+
+        node
+            .attr('cx', d => d.x)
+            .attr('cy', d => d.y);
+
+        labels
+            .attr('x', d => d.x)
+            .attr('y', d => d.y);
+    });
+}
+
+loadPreviewGraph();
+</script>
+{% endblock %}
