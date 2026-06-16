@@ -5,7 +5,7 @@ from logging.handlers import RotatingFileHandler
 import os
 
 from app.config import config
-from app.extensions import db, migrate, login_manager, mail, limiter
+from app.extensions import db, migrate, login_manager, mail
 
 
 def create_app(config_name=None):
@@ -21,7 +21,6 @@ def create_app(config_name=None):
     migrate.init_app(app, db)
     login_manager.init_app(app)
     mail.init_app(app)
-    limiter.init_app(app)
     CORS(app)
 
     # Register blueprints
