@@ -61,6 +61,8 @@ def register_blueprints(app):
     from app.blueprints.alerts import alerts_bp
     from app.blueprints.api import api_bp
     from app.blueprints.admin import admin_bp
+    from app.blueprints.pricing import pricing_bp
+    from app.blueprints.billing import billing_bp
 
     app.register_blueprint(landing_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
@@ -72,6 +74,8 @@ def register_blueprints(app):
     app.register_blueprint(ai_bp, url_prefix='/ai')
     app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
     app.register_blueprint(alerts_bp, url_prefix='/alerts')
+    app.register_blueprint(pricing_bp)
+    app.register_blueprint(billing_bp)
     app.register_blueprint(api_bp, url_prefix='/api/v1')
     app.register_blueprint(admin_bp, url_prefix='/admin')
 

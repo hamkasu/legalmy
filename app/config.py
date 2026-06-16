@@ -28,6 +28,9 @@ class Config:
     # Stripe
     STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
     STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET')
+    STRIPE_PRICE_STARTER = os.environ.get('STRIPE_PRICE_STARTER', 'price_starter_myr')
+    STRIPE_PRICE_PROFESSIONAL = os.environ.get('STRIPE_PRICE_PROFESSIONAL', 'price_professional_myr')
+    STRIPE_PRICE_FIRM = os.environ.get('STRIPE_PRICE_FIRM', 'price_firm_myr')
 
     # Redis
     REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
