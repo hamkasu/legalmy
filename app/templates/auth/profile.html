@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - LegalMY{% endblock %}
+
+{% block content %}
+<div class="container profile-page" style="padding: 40px 0;">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <h1 style="font-family: 'Merriweather', serif; color: #0D1B2A; margin-bottom: 30px;">My Account</h1>
+
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Profile Section -->
+                <div style="background: white; padding: 30px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #B8973A;">
+                    <h3 style="color: #0D1B2A; margin-bottom: 20px; font-weight: bold;">Profile Information</h3>
+
+                    <form method="POST" action="{{ url_for('auth.update_profile') }}">
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label for="email" style="font-weight: 600; color: #0D1B2A; margin-bottom: 8px; display: block;">Email Address</label>
+                            <input type="email" class="form-control" id="email" value="{{ current_user.email }}" disabled style="border-radius: 4px; padding: 10px 12px; border: 1px solid #e5e7eb; background-color: #f9fafb;">
+                            <small style="color: #64748B; display: block; margin-top: 6px;">Verified ✓</small>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label for="full_name" style="font-weight: 600; color: #0D1B2A; margin-bottom: 8px; display: block;">Full Name</label>
+                            <input type="text" class="form-control" id="full_name" name="full_name" value="{{ current_user.full_name }}" required style="border-radius: 4px; padding: 10px 12px; border: 1px solid #e5e7eb;">
+                        </div>
+
+                        {% if current_user.is_lawyer %}
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label for="bar_council" style="font-weight: 600; color: #0D1B2A; margin-bottom: 8px; display: block;">Bar Council Number</label>
+                            <input type="text" class="form-control" id="bar_council" value="{{ current_user.bar_council_number }}" disabled style="border-radius: 4px; padding: 10px 12px; border: 1px solid #e5e7eb; background-color: #f9fafb;">
+                            {% if current_user.is_verified %}
+                            <small style="color: #16A34A; display: block; margin-top: 6px;">✓ Verified Lawyer</small>
+                            {% else %}
+                            <small style="color: #F59E0B; display: block; margin-top: 6px;">⏳ Pending verification</small>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <button type="submit" class="btn btn-primary" style="background-color: #B8973A; border-color: #B8973A; color: #0D1B2A; font-weight: 600;">
+                            Update Profile
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Password Section -->
+                <div style="background: white; padding: 30px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #B8973A;">
+                    <h3 style="color: #0D1B2A; margin-bottom: 20px; font-weight: bold;">Change Password</h3>
+
+                    <form method="POST" action="{{ url_for('auth.change_password') }}">
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label for="current_password" style="font-weight: 600; color: #0D1B2A; margin-bottom: 8px; display: block;">Current Password</label>
+                            <input type="password" class="form-control" id="current_password" name="current_password" required style="border-radius: 4px; padding: 10px 12px; border: 1px solid #e5e7eb;">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label for="new_password" style="font-weight: 600; color: #0D1B2A; margin-bottom: 8px; display: block;">New Password</label>
+                            <input type="password" class="form-control" id="new_password" name="new_password" required minlength="8" style="border-radius: 4px; padding: 10px 12px; border: 1px solid #e5e7eb;">
+                            <small style="color: #64748B; display: block; margin-top: 6px;">At least 8 characters</small>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label for="confirm_password" style="font-weight: 600; color: #0D1B2A; margin-bottom: 8px; display: block;">Confirm New Password</label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required minlength="8" style="border-radius: 4px; padding: 10px 12px; border: 1px solid #e5e7eb;">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="background-color: #B8973A; border-color: #B8973A; color: #0D1B2A; font-weight: 600;">
+                            Change Password
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <!-- Subscription Card -->
+                <div style="background: linear-gradient(135deg, #0D1B2A 0%, #1a2f4d 100%); color: white; padding: 30px; border-radius: 8px; margin-bottom: 30px;">
+                    <h5 style="margin-bottom: 20px; font-weight: bold;">Subscription Plan</h5>
+
+                    <div style="margin-bottom: 20px;">
+                        <div style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 5px;">Current Plan</div>
+                        <div style="font-size: 1.5rem; font-weight: bold;">
+                            {% if subscription.plan == 'free' %}Free{% elif subscription.plan == 'starter' %}Starter{% elif subscription.plan == 'professional' %}Professional{% else %}Firm{% endif %}
+                        </div>
+                    </div>
+
+                    {% if subscription.plan != 'free' %}
+                    <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                        <div style="font-size: 0.85rem; opacity: 0.8;">Renews on</div>
+                        <div style="font-weight: 600;">{{ subscription.current_period_end.strftime('%d %b %Y') }}</div>
+                    </div>
+                    {% endif %}
+
+                    <a href="{{ url_for('pricing.index') }}" class="btn btn-outline-light" style="width: 100%; color: white; border-color: white; font-weight: 600;">
+                        {% if subscription.plan == 'free' %}Upgrade Plan{% else %}Change Plan{% endif %}
+                    </a>
+                </div>
+
+                <!-- Help Card -->
+                <div style="background: #f3f4f6; padding: 20px; border-radius: 8px;">
+                    <h5 style="color: #0D1B2A; margin-bottom: 15px; font-weight: bold;">Need Help?</h5>
+                    <div style="color: #64748B; font-size: 0.9rem; line-height: 1.6;">
+                        <p style="margin-bottom: 10px;">Have questions about your account or subscription?</p>
+                        <a href="#" style="color: #B8973A; font-weight: 600; text-decoration: none;">Contact Support</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

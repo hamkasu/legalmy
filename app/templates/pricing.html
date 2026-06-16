@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Pricing - LegalMY{% endblock %}
+
+{% block content %}
+<div class="container pricing-page" style="padding: 60px 0;">
+    <div style="text-align: center; margin-bottom: 60px;">
+        <h1 style="font-family: 'Merriweather', serif; color: #0D1B2A; margin-bottom: 15px; font-size: 2.5rem;">Transparent Pricing</h1>
+        <p style="color: #64748B; font-size: 1.1rem; margin-bottom: 30px;">Choose the right plan for your legal research needs</p>
+
+        <!-- Billing Toggle -->
+        <div style="display: flex; justify-content: center; align-items: center; gap: 20px;">
+            <span style="color: #64748B;">Monthly</span>
+            <div style="background: #e5e7eb; border-radius: 20px; padding: 4px; display: inline-flex; gap: 0;">
+                <button onclick="toggleBilling('monthly')" id="monthly-btn" style="background: white; border: none; padding: 6px 16px; border-radius: 16px; color: #0D1B2A; font-weight: 600; cursor: pointer; transition: all 0.3s;">Monthly</button>
+                <button onclick="toggleBilling('annual')" id="annual-btn" style="background: transparent; border: none; padding: 6px 16px; border-radius: 16px; color: #64748B; cursor: pointer; transition: all 0.3s;">Annual</button>
+            </div>
+            <span style="color: #64748B;">Annual <span style="color: #16A34A; font-weight: 600;">Save 20%</span></span>
+        </div>
+    </div>
+
+    <!-- Pricing Cards -->
+    <div class="row" style="margin-bottom: 60px;">
+        <!-- Free Plan -->
+        <div class="col-lg-3 col-md-6" style="margin-bottom: 30px;">
+            <div style="background: white; padding: 30px; border-radius: 8px; border: 2px solid #e5e7eb; height: 100%; display: flex; flex-direction: column;">
+                <h3 style="color: #0D1B2A; font-weight: bold; margin-bottom: 10px;">Free</h3>
+                <div style="margin-bottom: 20px;">
+                    <span style="font-size: 2rem; font-weight: bold; color: #0D1B2A;">RM 0</span>
+                    <span style="color: #64748B; font-size: 0.9rem;">/month</span>
+                </div>
+
+                <ul style="list-style: none; padding: 0; margin-bottom: 30px; flex-grow: 1;">
+                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ 10 searches/day</li>
+                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ No AI tools</li>
+                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ Basic judgment view</li>
+                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ 1 saved search</li>
+                    <li style="padding: 10px 0; color: #64748B;">✗ No judge analytics</li>
+                </ul>
+
+                <button class="btn btn-secondary" style="width: 100%; border-radius: 4px;">Current Plan</button>
+            </div>
+        </div>
+
+        <!-- Starter Plan -->
+        <div class="col-lg-3 col-md-6" style="margin-bottom: 30px;">
+            <div style="background: white; padding: 30px; border-radius: 8px; border: 3px solid #B8973A; position: relative; height: 100%; display: flex; flex-direction: column; box-shadow: 0 8px 24px rgba(184, 151, 58, 0.15);">
+                <div style="position: absolute; top: -15px; left: 20px; background: #B8973A; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">POPULAR</div>
+                <h3 style="color: #0D1B2A; font-weight: bold; margin-bottom: 10px; margin-top: 10px;">Starter</h3>
+                <div style="margin-bottom: 20px;">
+                    <span style="font-size: 2rem; font-weight: bold; color: #0D1B2A;">RM 99</span>
+                    <span style="color: #64748B; font-size: 0.9rem;" id="starter-annual" style="display: none;"> RM 792/year</span>
+                    <span style="color: #64748B; font-size: 0.9rem;">/month</span>
+                </div>
+
+                <ul style="list-style: none; padding: 0; margin-bottom: 30px; flex-grow: 1;">
+                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ Unlimited searches</li>
+                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ 50 AI queries/month</li>
+                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ Full judgment access</li>
+                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ 5 saved searches</li>
+                    <li style="padding: 10px 0; color: #64748B;">✓ Judge analytics</li>
+                </ul>
+
+                <a href="{{ url_for('auth.upgrade_plan', plan='starter') }}" class="btn btn-primary" style="width: 100%; background-color: #B8973A; border-color: #B8973A; color: #0D1B2A; font-weight: 600; border-radius: 4px; text-decoration: none;">Upgrade to Starter</a>
+            </div>
+        </div>
+
+        <!-- Professional Plan -->
+        <div class="col-lg-3 col-md-6" style="margin-bottom: 30px;">
+            <div style="background: white; padding: 30px; border-radius: 8px; border: 2px solid #e5e7eb; height: 100%; display: flex; flex-direction: column;">
+                <h3 style="color: #0D1B2A; font-weight: bold; margin-bottom: 10px;">Professional</h3>
+                <div style="margin-bottom: 20px;">
+                    <span style="font-size: 2rem; font-weight: bold; color: #0D1B2A;">RM 299</span>
+                    <span style="color: #64748B; font-size: 0.9rem;">/month</span>
+                </div>
+
+                <ul style="list-style: none; padding: 0; margin-bottom: 30px; flex-grow: 1;">
+                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ Unlimited searches</li>
+                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ 500 AI queries/month</li>
+                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ Unlimited exports</li>
+                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ 25 saved searches</li>
+                    <li style="padding: 10px 0; color: #64748B;">✓ Judge + Lawyer analytics</li>
+                </ul>
+
+                <a href="{{ url_for('auth.upgrade_plan', plan='professional') }}" class="btn btn-primary" style="width: 100%; background-color: #B8973A; border-color: #B8973A; color: #0D1B2A; font-weight: 600; border-radius: 4px; text-decoration: none;">Upgrade to Professional</a>
+            </div>
+        </div>
+
+        <!-- Firm Plan -->
+        <div class="col-lg-3 col-md-6" style="margin-bottom: 30px;">
+            <div style="background: white; padding: 30px; border-radius: 8px; border: 2px solid #e5e7eb; height: 100%; display: flex; flex-direction: column;">
+                <h3 style="color: #0D1B2A; font-weight: bold; margin-bottom: 10px;">Firm</h3>
+                <div style="margin-bottom: 20px;">
+                    <span style="font-size: 2rem; font-weight: bold; color: #0D1B2A;">RM 999</span>
+                    <span style="color: #64748B; font-size: 0.9rem;">/month</span>
+                </div>
+
+                <ul style="list-style: none; padding: 0; margin-bottom: 30px; flex-grow: 1;">
+                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ Unlimited everything</li>
+                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ 10 team seats</li>
+                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ API access</li>
+                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ Priority support</li>
+                    <li style="padding: 10px 0; color: #64748B;">✓ Custom integrations</li>
+                </ul>
+
+                <a href="{{ url_for('auth.upgrade_plan', plan='firm') }}" class="btn btn-primary" style="width: 100%; background-color: #B8973A; border-color: #B8973A; color: #0D1B2A; font-weight: 600; border-radius: 4px; text-decoration: none;">Upgrade to Firm</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trust Signals -->
+    <div style="background: #f3f4f6; padding: 40px; border-radius: 8px; margin-bottom: 60px;">
+        <div class="row" style="text-align: center;">
+            <div class="col-md-4" style="margin-bottom: 20px;">
+                <div style="font-size: 2rem; font-weight: bold; color: #0D1B2A;">500+</div>
+                <div style="color: #64748B;">Malaysian lawyers</div>
+            </div>
+            <div class="col-md-4" style="margin-bottom: 20px;">
+                <div style="font-size: 2rem; font-weight: bold; color: #0D1B2A;">100,000+</div>
+                <div style="color: #64748B;">Judgments indexed</div>
+            </div>
+            <div class="col-md-4" style="margin-bottom: 20px;">
+                <div style="font-size: 2rem; font-weight: bold; color: #0D1B2A;">256-bit</div>
+                <div style="color: #64748B;">Encryption standard</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div style="max-width: 800px; margin: 0 auto;">
+        <h2 style="color: #0D1B2A; font-weight: bold; margin-bottom: 30px; text-align: center;">Frequently Asked Questions</h2>
+
+        <div style="margin-bottom: 20px;">
+            <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #B8973A;">
+                <h5 style="color: #0D1B2A; font-weight: bold; margin-bottom: 10px;">Can I cancel anytime?</h5>
+                <p style="color: #64748B; margin-bottom: 0;">Yes, you can cancel your subscription at any time from your account settings. No long-term contracts or cancellation fees.</p>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #B8973A;">
+                <h5 style="color: #0D1B2A; font-weight: bold; margin-bottom: 10px;">Do you offer annual discounts?</h5>
+                <p style="color: #64748B; margin-bottom: 0;">Yes! Pay annually and save 20% on all plans. Switch from monthly to annual billing in your settings at any time.</p>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #B8973A;">
+                <h5 style="color: #0D1B2A; font-weight: bold; margin-bottom: 10px;">What payment methods do you accept?</h5>
+                <p style="color: #64748B; margin-bottom: 0;">We accept credit cards (Visa, Mastercard), debit cards, and FPX (Malaysian online banking). All payments are processed securely via Stripe.</p>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #B8973A;">
+                <h5 style="color: #0D1B2A; font-weight: bold; margin-bottom: 10px;">Is there a free trial?</h5>
+                <p style="color: #64748B; margin-bottom: 0;">Our Free plan is essentially a free trial with limited features. Verified lawyers get a 30-day Professional trial after admin approval.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleBilling(period) {
+    // Update button states
+    document.getElementById('monthly-btn').style.background = period === 'monthly' ? 'white' : 'transparent';
+    document.getElementById('monthly-btn').style.color = period === 'monthly' ? '#0D1B2A' : '#64748B';
+    document.getElementById('annual-btn').style.background = period === 'annual' ? 'white' : 'transparent';
+    document.getElementById('annual-btn').style.color = period === 'annual' ? '#0D1B2A' : '#64748B';
+
+    // Show/hide annual prices (placeholder for now)
+    if (period === 'annual') {
+        // Would update prices here
+    }
+}
+</script>
+{% endblock %}

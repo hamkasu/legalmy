@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Login - LegalMY{% endblock %}
+
+{% block content %}
+<div class="container auth-page" style="max-width: 500px; margin-top: 60px; margin-bottom: 60px;">
+    <div style="text-align: center; margin-bottom: 40px;">
+        <h1 style="font-family: 'Merriweather', serif; color: #0D1B2A; margin-bottom: 10px;">Welcome Back</h1>
+        <p style="color: #64748B;">Log in to access your LegalMY account</p>
+    </div>
+
+    <div style="background: white; padding: 40px; border-radius: 8px; border-left: 4px solid #B8973A; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+        <form method="POST">
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="email" style="font-weight: 600; color: #0D1B2A; margin-bottom: 8px; display: block;">Email Address</label>
+                <input type="email" class="form-control" id="email" name="email" required style="border-radius: 4px; padding: 10px 12px; border: 1px solid #e5e7eb;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 30px;">
+                <label for="password" style="font-weight: 600; color: #0D1B2A; margin-bottom: 8px; display: block;">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required style="border-radius: 4px; padding: 10px 12px; border: 1px solid #e5e7eb;">
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="remember" name="remember" value="1">
+                    <label for="remember" style="color: #64748B; font-size: 0.9rem; margin: 0;">Remember me</label>
+                </div>
+                <a href="{{ url_for('auth.forgot_password') }}" style="color: #B8973A; font-size: 0.9rem; text-decoration: none;">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; background-color: #B8973A; border-color: #B8973A; color: #0D1B2A; font-weight: 600; padding: 12px; border-radius: 4px; font-size: 1rem;">
+                Log In
+            </button>
+
+            <div style="text-align: center; margin-top: 20px; color: #64748B;">
+                Don't have an account? <a href="{{ url_for('auth.register') }}" style="color: #B8973A; font-weight: 600; text-decoration: none;">Sign up</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
