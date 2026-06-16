@@ -1,0 +1,15 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "flask db upgrade && gunicorn 'app:create_app()' --workers 2 --threads 4 --timeout 120 --bind 0.0.0.0:$PORT"
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+
+[[services]]
+name = "web"
+startCommand = "flask db upgrade && gunicorn 'app:create_app()' --workers 2 --threads 4 --timeout 120 --bind 0.0.0.0:$PORT"
+
+[[services]]
+name = "worker"
+startCommand = "celery -A celery_worker worker --loglevel=info -Q default,ingest,alerts"

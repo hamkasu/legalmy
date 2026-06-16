@@ -1,0 +1,71 @@
+/* LegalMY Custom Styles */
+
+:root {
+    --primary-navy: #0D1B2A;
+    --primary-gold: #B8973A;
+    --secondary-slate: #64748B;
+    --success-green: #16A34A;
+    --danger-red: #DC2626;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #FFFFFF;
+    color: var(--primary-navy);
+    line-height: 1.7;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Merriweather', serif;
+    color: var(--primary-navy);
+}
+
+.navbar {
+    background-color: var(--primary-navy) !important;
+    border-bottom: 3px solid var(--primary-gold);
+}
+
+.navbar-brand {
+    font-family: 'Merriweather', serif;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-gold) !important;
+}
+
+.btn-primary {
+    background-color: var(--primary-gold);
+    border-color: var(--primary-gold);
+    color: var(--primary-navy);
+    font-weight: 600;
+}
+
+.btn-primary:hover {
+    background-color: #A17D2C;
+    border-color: #A17D2C;
+}
+
+.card {
+    border-left: 4px solid var(--primary-gold);
+    transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.badge-allowed {
+    background-color: var(--success-green);
+}
+
+.badge-dismissed {
+    background-color: var(--danger-red);
+}
+
+.badge-partly {
+    background-color: #F59E0B;
+}
+
+.footer {
+    border-top: 1px solid #E5E7EB;
+    margin-top: 3rem;
+}
