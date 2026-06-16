@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Case Analyser - LegalMY AI Tools{% endblock %}
+
+{% block content %}
+<div class="container ai-tool">
+    <h1 style="font-family: 'Merriweather', serif; color: #0D1B2A; margin-bottom: 30px;">⚖️ Case Analyser</h1>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div style="background: white; padding: 30px; border-radius: 4px; border-left: 4px solid #B8973A;">
+                <p style="color: #64748B; margin-bottom: 20px;">
+                    Paste or upload a Writ of Summons or Statement of Claim. The AI will assess your case strength, identify causes of action, anticipate defences, and suggest next steps.
+                </p>
+
+                <form id="analyser-form">
+                    <div class="form-group">
+                        <label for="pleading_text" style="font-weight: bold; color: #0D1B2A;">Pleading Text</label>
+                        <textarea class="form-control" id="pleading_text" name="pleading_text" rows="10" placeholder="Paste your WOS or SOC here..." style="font-family: monospace;"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="user_role" style="font-weight: bold; color: #0D1B2A;">Your Role</label>
+                        <select class="form-control" id="user_role" name="user_role">
+                            <option value="plaintiff">Plaintiff</option>
+                            <option value="defendant">Defendant</option>
+                            <option value="appellant">Appellant</option>
+                            <option value="respondent">Respondent</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="background-color: #B8973A; border-color: #B8973A; color: #0D1B2A; font-weight: 600;">
+                        Analyze Case
+                    </button>
+                </form>
+
+                <!-- Results -->
+                <div id="results" style="margin-top: 40px; display: none;">
+                    <h3 style="color: #0D1B2A; font-weight: bold; border-bottom: 2px solid #B8973A; padding-bottom: 10px; margin-bottom: 20px;">Analysis Results</h3>
+
+                    <div style="background: linear-gradient(135deg, #0D1B2A 0%, #1a2f4d 100%); color: white; padding: 20px; border-radius: 4px; margin-bottom: 20px;">
+                        <h5 style="margin-bottom: 10px;">Case Strength Assessment</h5>
+                        <div id="case-strength" style="font-size: 2rem; font-weight: bold;"></div>
+                        <div id="case-strength-justification" style="margin-top: 10px;"></div>
+                    </div>
+
+                    <h5 style="color: #0D1B2A; margin-top: 20px; margin-bottom: 10px;">Causes of Action</h5>
+                    <div id="causes-of-action"></div>
+
+                    <h5 style="color: #0D1B2A; margin-top: 20px; margin-bottom: 10px;">Potential Defences</h5>
+                    <div id="defences"></div>
+
+                    <h5 style="color: #0D1B2A; margin-top: 20px; margin-bottom: 10px;">Risk Factors</h5>
+                    <div id="risks"></div>
+
+                    <h5 style="color: #0D1B2A; margin-top: 20px; margin-bottom: 10px;">Next Steps</h5>
+                    <div id="next-steps"></div>
+
+                    <button class="btn btn-secondary" style="margin-top: 20px;" onclick="downloadReport()">📥 Save Report</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div style="background: #f3f4f6; padding: 20px; border-radius: 4px;">
+                <h5 style="color: #0D1B2A; margin-bottom: 15px; font-weight: bold;">How It Works</h5>
+                <ol style="color: #64748B; line-height: 1.8;">
+                    <li>Paste your pleading (WOS or SOC)</li>
+                    <li>Select your role in the case</li>
+                    <li>AI analyzes under Malaysian law</li>
+                    <li>Get structured assessment</li>
+                    <li>Save as PDF report</li>
+                </ol>
+
+                <div style="background: white; padding: 15px; border-radius: 4px; margin-top: 20px;">
+                    <p style="font-size: 0.9rem; color: #64748B; margin-bottom: 0;">
+                        <strong>⚡ Powered by Claude AI</strong><br>
+                        Analysis uses Malaysian statutes, case law, and procedural rules
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('analyser-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const pleadingText = document.getElementById('pleading_text').value;
+        const userRole = document.getElementById('user_role').value;
+
+        if (!pleadingText) {
+            alert('Please paste pleading text');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('pleading_text', pleadingText);
+        formData.append('user_role', userRole);
+
+        try {
+            const response = await fetch('/ai/case-analyser', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+                alert('Error: ' + data.error);
+                return;
+            }
+
+            // Display results
+            document.getElementById('case-strength').textContent = data.case_strength.rating + '/10';
+            document.getElementById('case-strength-justification').textContent = data.case_strength.justification;
+
+            document.getElementById('causes-of-action').innerHTML = data.causes_of_action
+                .map(c => `<div style="background: #f3f4f6; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
+                    <strong>${c.cause}</strong><br/>
+                    Statute: ${c.statute}<br/>
+                    Elements Met: ${c.elements_met ? '✓ Yes' : '✗ No'}
+                </div>`).join('');
+
+            document.getElementById('defences').innerHTML = data.potential_defences
+                .map(d => `<div style="background: #f3f4f6; padding: 10px; margin-bottom: 8px; border-radius: 4px;">• ${d}</div>`).join('');
+
+            document.getElementById('risks').innerHTML = data.risk_factors
+                .map(r => `<div style="background: #f3f4f6; padding: 10px; margin-bottom: 8px; border-radius: 4px;">⚠️ ${r}</div>`).join('');
+
+            document.getElementById('next-steps').innerHTML = data.next_steps
+                .map(s => `<div style="background: #f3f4f6; padding: 10px; margin-bottom: 8px; border-radius: 4px;">
+                    <strong>Step ${s.step}: ${s.action}</strong><br/>
+                    Timeline: ${s.timeline}
+                </div>`).join('');
+
+            document.getElementById('results').style.display = 'block';
+            document.querySelector('.ai-tool').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (error) {
+            alert('Error analyzing case: ' + error.message);
+        }
+    });
+
+    function downloadReport() {
+        alert('PDF export coming soon');
+    }
+</script>
+{% endblock %}

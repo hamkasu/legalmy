@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}AI Legal Tools - LegalMY{% endblock %}
+
+{% block content %}
+<div class="container ai-dashboard">
+    <div style="margin-bottom: 40px;">
+        <h1 style="font-family: 'Merriweather', serif; color: #0D1B2A; margin-bottom: 10px;">🤖 AI Legal Tools</h1>
+        <p style="color: #64748B; font-size: 1.1rem;">Powered by Claude AI for Malaysian legal professionals</p>
+    </div>
+
+    <!-- Quota Usage Bar -->
+    <div style="background: white; padding: 20px; border-radius: 4px; margin-bottom: 40px; border-left: 4px solid #B8973A;">
+        <h5 style="color: #0D1B2A; margin-bottom: 10px;">Monthly AI Query Quota</h5>
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <div style="flex: 1;">
+                <div class="progress" style="height: 24px;">
+                    <div class="progress-bar" style="width: {% if quota_limit > 0 %}{{ (queries_used / quota_limit * 100)|int }}{% else %}0{% endif %}%; background-color: #B8973A;">
+                        <span style="color: white; padding: 2px 5px; font-size: 0.9rem;">{{ queries_used }} / {{ quota_limit }}</span>
+                    </div>
+                </div>
+            </div>
+            <div style="white-space: nowrap;">
+                <strong>{{ queries_used }} / {{ quota_limit }}</strong>
+            </div>
+        </div>
+        {% if user_plan == 'free' %}
+        <p style="color: #F59E0B; margin-top: 10px; margin-bottom: 0;">
+            <strong>Free tier:</strong> 0 queries/month. <a href="/pricing" style="color: #0D1B2A; font-weight: bold;">Upgrade to start using AI tools</a>
+        </p>
+        {% endif %}
+    </div>
+
+    <!-- Tools Grid -->
+    <div class="row">
+        {% for tool in tools %}
+        <div class="col-md-4" style="margin-bottom: 30px;">
+            <div class="tool-card" style="background: white; padding: 30px; border-radius: 4px; border-left: 4px solid #B8973A; text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s, box-shadow 0.2s;">
+                <div>
+                    <div style="font-size: 3rem; margin-bottom: 15px;">{{ tool.icon }}</div>
+                    <h5 style="color: #0D1B2A; margin-bottom: 10px; font-weight: bold;">{{ tool.name }}</h5>
+                    <p style="color: #64748B; font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px;">
+                        {{ tool.description }}
+                    </p>
+                </div>
+
+                {% if tool.locked %}
+                <div style="background: rgba(0,0,0,0.05); padding: 15px; border-radius: 4px; margin-bottom: 15px;">
+                    <div style="color: #64748B; font-size: 0.9rem; margin-bottom: 10px;">
+                        🔒 <strong>Subscriber feature</strong>
+                    </div>
+                    <p style="color: #64748B; font-size: 0.85rem; margin: 0;">
+                        Upgrade to Starter (RM99/month) or higher to unlock
+                    </p>
+                </div>
+                <a href="/pricing" class="btn btn-primary" style="width: 100%; background-color: #B8973A; border-color: #B8973A; color: #0D1B2A; font-weight: 600;">
+                    Upgrade Now
+                </a>
+                {% else %}
+                <a href="/ai/{{ tool.id }}" class="btn btn-primary" style="width: 100%; background-color: #B8973A; border-color: #B8973A; color: #0D1B2A; font-weight: 600;">
+                    Try Now →
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Feature List -->
+    <div style="background: linear-gradient(135deg, #0D1B2A 0%, #1a2f4d 100%); color: white; padding: 40px; border-radius: 4px; margin-top: 60px;">
+        <h3 style="margin-bottom: 20px;">Why Use LegalMY AI Tools?</h3>
+        <div class="row">
+            <div class="col-md-4">
+                <div style="margin-bottom: 20px;">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">⚡</div>
+                    <h5>Malaysia-Focused</h5>
+                    <p>All analysis uses Malaysian law, statutes, and case precedents</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div style="margin-bottom: 20px;">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">🔒</div>
+                    <h5>Confidential</h5>
+                    <p>Your case details are never stored or shared</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div style="margin-bottom: 20px;">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">🎯</div>
+                    <h5>Structured Output</h5>
+                    <p>Results formatted for easy export and reporting</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .tool-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}
