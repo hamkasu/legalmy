@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - LegalMY{% endblock %}
+
+{% block content %}
+<div class="container dashboard-page" style="padding: 40px 0;">
+    <!-- Welcome Banner -->
+    <div style="background: linear-gradient(135deg, #0D1B2A 0%, #1a2f4d 100%); color: white; padding: 40px; border-radius: 8px; margin-bottom: 40px;">
+        <div style="display: flex; justify-content: space-between; align-items: start;">
+            <div>
+                <h1 style="font-family: 'Merriweather', serif; margin: 0 0 10px 0; font-size: 2rem;">Welcome back, {{ current_user.full_name }}! 👋</h1>
+                <p style="opacity: 0.9; margin: 0;">{{ subscription.get('plan', 'Free').title() }} Plan • {{ current_user.email }}</p>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 0.9rem; opacity: 0.8;">Plan Status</div>
+                <div style="font-size: 1.3rem; font-weight: bold;">
+                    {% if subscription.plan == 'free' %}
+                    FREE
+                    {% else %}
+                    {{ subscription.plan.upper() }}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Quota Bar -->
+        {% if monthly_ai_limit > 0 %}
+        <div style="margin-top: 20px;">
+            <div style="font-size: 0.9rem; margin-bottom: 8px;">Monthly AI Query Quota</div>
+            <div class="progress" style="height: 8px; background: rgba(255,255,255,0.2);">
+                <div class="progress-bar" style="width: {% if monthly_ai_limit > 0 %}{{ (total_ai_usage / monthly_ai_limit * 100)|int }}{% else %}0{% endif %}%; background: #B8973A; height: 100%;"></div>
+            </div>
+            <div style="font-size: 0.85rem; margin-top: 8px; opacity: 0.9;">{{ total_ai_usage }} / {{ monthly_ai_limit }} queries used</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Recent Searches -->
+            <div style="background: white; padding: 30px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #B8973A;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="color: #0D1B2A; margin: 0; font-weight: bold;">📌 Recent Searches</h3>
+                    <a href="{{ url_for('search.index') }}" style="color: #B8973A; text-decoration: none; font-weight: 600;">New Search →</a>
+                </div>
+
+                {% if recent_searches %}
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    {% for search in recent_searches %}
+                    <div style="background: #f3f4f6; padding: 15px; border-radius: 4px; cursor: pointer; transition: all 0.2s;" onclick="if(event.target.tagName !== 'BUTTON') window.location.href='{{ url_for('search.index') }}?q={{ search.query_json.get('query', '') }}'">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <strong style="color: #0D1B2A;">{{ search.name }}</strong>
+                                <div style="font-size: 0.9rem; color: #64748B; margin-top: 4px;">{{ search.query_json.get('query', '') }}</div>
+                            </div>
+                            <div style="text-align: right; color: #64748B; font-size: 0.85rem;">
+                                {{ search.created_at.strftime('%d %b') }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p style="color: #64748B; text-align: center; padding: 20px;">No searches yet. <a href="{{ url_for('search.index') }}" style="color: #B8973A; font-weight: 600;">Start searching</a></p>
+                {% endif %}
+            </div>
+
+            <!-- Alerts Overview -->
+            <div style="background: white; padding: 30px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #B8973A;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="color: #0D1B2A; margin: 0; font-weight: bold;">🔔 Active Alerts</h3>
+                    <a href="{{ url_for('dashboard.alerts_list') }}" style="color: #B8973A; text-decoration: none; font-weight: 600;">Manage →</a>
+                </div>
+
+                {% if active_alerts %}
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    {% for alert in active_alerts %}
+                    <div style="background: #f3f4f6; padding: 15px; border-radius: 4px;">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <strong style="color: #0D1B2A;">{{ alert.saved_search.name }}</strong>
+                                <div style="font-size: 0.9rem; color: #64748B; margin-top: 4px;">
+                                    <strong>{{ alert.frequency.upper() }}</strong> • Last sent: {{ alert.last_sent.strftime('%d %b %Y') if alert.last_sent else 'Never' }}
+                                </div>
+                            </div>
+                            <button onclick="pauseAlert({{ alert.id }})" style="background: #B8973A; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; cursor: pointer; font-weight: 600;">Pause</button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p style="color: #64748B; text-align: center; padding: 20px;">No active alerts. <a href="{{ url_for('dashboard.alerts_list') }}" style="color: #B8973A; font-weight: 600;">Create one</a></p>
+                {% endif %}
+            </div>
+
+            <!-- AI Usage Chart -->
+            {% if ai_usage %}
+            <div style="background: white; padding: 30px; border-radius: 8px; border-left: 4px solid #B8973A;">
+                <h3 style="color: #0D1B2A; margin-top: 0; margin-bottom: 20px; font-weight: bold;">📊 AI Tools Usage This Month</h3>
+
+                <canvas id="aiChart" style="max-height: 300px;"></canvas>
+
+                <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+                <script>
+                    const ctx = document.getElementById('aiChart').getContext('2d');
+                    const aiData = {{ ai_usage | tojson }};
+                    const labels = Object.keys(aiData).map(k => k.replace(/_/g, ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
+                    const data = Object.values(aiData);
+
+                    new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                data: data,
+                                backgroundColor: [
+                                    '#B8973A', '#0D1B2A', '#1a2f4d', '#4B5563', '#64748B', '#16A34A'
+                                ],
+                                borderColor: 'white',
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: { font: { size: 12 }, color: '#64748B' }
+                                }
+                            }
+                        }
+                    });
+                </script>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quick Links -->
+            <div style="background: white; padding: 30px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #B8973A;">
+                <h4 style="color: #0D1B2A; margin-top: 0; margin-bottom: 20px; font-weight: bold;">🚀 Quick Links</h4>
+
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <a href="{{ url_for('search.index') }}" class="btn btn-primary" style="background-color: #B8973A; border-color: #B8973A; color: #0D1B2A; text-decoration: none; display: block; text-align: center; padding: 10px; font-weight: 600; border-radius: 4px;">
+                        🔍 New Search
+                    </a>
+                    <a href="{{ url_for('legislation.index') }}" class="btn btn-outline-primary" style="border: 2px solid #B8973A; color: #B8973A; text-decoration: none; display: block; text-align: center; padding: 10px; font-weight: 600; border-radius: 4px;">
+                        📜 Browse Legislation
+                    </a>
+                    <a href="{{ url_for('judges.index') }}" class="btn btn-outline-primary" style="border: 2px solid #B8973A; color: #B8973A; text-decoration: none; display: block; text-align: center; padding: 10px; font-weight: 600; border-radius: 4px;">
+                        ⚖️ Judge Lookup
+                    </a>
+                    <a href="{{ url_for('ai.index') }}" class="btn btn-outline-primary" style="border: 2px solid #B8973A; color: #B8973A; text-decoration: none; display: block; text-align: center; padding: 10px; font-weight: 600; border-radius: 4px;">
+                        🤖 AI Tools
+                    </a>
+                </div>
+            </div>
+
+            <!-- Plan Info Card -->
+            <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                <h5 style="color: #0D1B2A; margin-top: 0; margin-bottom: 15px; font-weight: bold;">Plan Features</h5>
+
+                <div style="font-size: 0.9rem; color: #64748B; line-height: 1.8;">
+                    {% if plan_info.searches_per_day == -1 %}
+                    ✓ <strong>Unlimited searches</strong><br>
+                    {% else %}
+                    ✓ <strong>{{ plan_info.searches_per_day }} searches/day</strong><br>
+                    {% endif %}
+
+                    {% if plan_info.ai_queries_per_month == -1 %}
+                    ✓ <strong>Unlimited AI queries</strong><br>
+                    {% elif plan_info.ai_queries_per_month == 0 %}
+                    ✗ No AI tools<br>
+                    {% else %}
+                    ✓ <strong>{{ plan_info.ai_queries_per_month }} AI queries/month</strong><br>
+                    {% endif %}
+
+                    {% if plan_info.get('judge_analytics') %}
+                    ✓ Judge Analytics<br>
+                    {% else %}
+                    ✗ Judge Analytics<br>
+                    {% endif %}
+
+                    {% if plan_info.get('lawyer_analytics') %}
+                    ✓ Lawyer Analytics<br>
+                    {% else %}
+                    ✗ Lawyer Analytics<br>
+                    {% endif %}
+                </div>
+
+                {% if subscription.plan == 'free' %}
+                <a href="{{ url_for('pricing.index') }}" class="btn btn-primary" style="width: 100%; background-color: #B8973A; border-color: #B8973A; color: #0D1B2A; text-decoration: none; display: block; text-align: center; padding: 10px; font-weight: 600; border-radius: 4px; margin-top: 15px;">
+                    Upgrade Now
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Help Card -->
+            <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #B8973A;">
+                <h5 style="color: #0D1B2A; margin-top: 0; margin-bottom: 10px; font-weight: bold;">❓ Need Help?</h5>
+                <p style="color: #64748B; font-size: 0.9rem; margin-bottom: 10px;">Check out our guides and resources</p>
+                <a href="#" style="color: #B8973A; font-weight: 600; text-decoration: none;">View Documentation →</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function pauseAlert(alertId) {
+    fetch(`/dashboard/alerts/${alertId}/pause`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(data.status === 'success') {
+            location.reload();
+        }
+    });
+}
+</script>
+{% endblock %}
