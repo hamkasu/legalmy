@@ -1,0 +1,314 @@
+{% extends "base.html" %}
+
+{% block title %}{{ judgment.citation }} - LegalMY{% endblock %}
+
+{% block content %}
+<div style="padding: 40px 0;">
+    <div class="container" style="max-width: 1400px;">
+        <!-- Judgment Header -->
+        <div style="margin-bottom: 40px;">
+            <h1 style="font-family: 'Merriweather', serif; color: #0D1B2A; margin-bottom: 10px;">{{ judgment.citation }}</h1>
+            <p style="color: #64748B; font-size: 1.1rem; margin-bottom: 20px;">{{ judgment.title }}</p>
+
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px;">
+                <div style="background: white; padding: 15px; border-radius: 4px; border-left: 4px solid #B8973A;">
+                    <div style="color: #64748B; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Court</div>
+                    <div style="color: #0D1B2A; font-weight: 600; margin-top: 5px;">{{ judgment.court_level.value }}</div>
+                    <div style="color: #64748B; font-size: 0.85rem; margin-top: 2px;">{{ judgment.court_location }}</div>
+                </div>
+                <div style="background: white; padding: 15px; border-radius: 4px; border-left: 4px solid #B8973A;">
+                    <div style="color: #64748B; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Date</div>
+                    <div style="color: #0D1B2A; font-weight: 600; margin-top: 5px;">
+                        {% if judgment.date_decided %}{{ judgment.date_decided.strftime('%d %b %Y') }}{% else %}N/A{% endif %}
+                    </div>
+                </div>
+                <div style="background: white; padding: 15px; border-radius: 4px; border-left: 4px solid #B8973A;">
+                    <div style="color: #64748B; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Outcome</div>
+                    <div style="color: #0D1B2A; font-weight: 600; margin-top: 5px;">
+                        {% if judgment.outcome %}
+                            {% if judgment.outcome.value == 'allowed' %}
+                                <span style="background: #DCFCE7; color: #166534; padding: 4px 8px; border-radius: 3px; font-size: 0.85rem;">Allowed</span>
+                            {% elif judgment.outcome.value == 'dismissed' %}
+                                <span style="background: #FEE2E2; color: #991B1B; padding: 4px 8px; border-radius: 3px; font-size: 0.85rem;">Dismissed</span>
+                            {% else %}
+                                <span style="background: #F3F4F6; color: #374151; padding: 4px 8px; border-radius: 3px; font-size: 0.85rem;">{{ judgment.outcome.value | title }}</span>
+                            {% endif %}
+                        {% else %}
+                            <span style="color: #9CA3AF;">N/A</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div style="background: white; padding: 15px; border-radius: 4px; border-left: 4px solid #B8973A;">
+                    <div style="color: #64748B; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Citations</div>
+                    <div style="color: #0D1B2A; font-weight: 600; margin-top: 5px; font-size: 1.3rem;">{{ judgment.citation_count }}</div>
+                    <div style="color: #64748B; font-size: 0.85rem; margin-top: 2px;">times cited</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graph Controls -->
+        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+            <div style="display: flex; gap: 30px; align-items: center;">
+                <div>
+                    <label style="color: #0D1B2A; font-weight: 600; font-size: 0.9rem; display: block; margin-bottom: 8px;">Graph Depth</label>
+                    <select id="depthSelect" style="padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 4px; font-size: 0.9rem;">
+                        <option value="1">1 hop</option>
+                        <option value="2">2 hops</option>
+                        <option value="3">3 hops</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="color: #0D1B2A; font-weight: 600; font-size: 0.9rem; display: block; margin-bottom: 8px;">Filter Relationships</label>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <label style="display: flex; align-items: center; gap: 5px; font-size: 0.85rem;">
+                            <input type="checkbox" class="relationship-filter" value="followed" checked>
+                            <span style="color: #0D1B2A;">Followed</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; font-size: 0.85rem;">
+                            <input type="checkbox" class="relationship-filter" value="distinguished" checked>
+                            <span style="color: #0D1B2A;">Distinguished</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; font-size: 0.85rem;">
+                            <input type="checkbox" class="relationship-filter" value="overruled" checked>
+                            <span style="color: #0D1B2A;">Overruled</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; font-size: 0.85rem;">
+                            <input type="checkbox" class="relationship-filter" value="considered" checked>
+                            <span style="color: #0D1B2A;">Considered</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button id="exportBtn" style="background: #B8973A; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.85rem;">Export PNG</button>
+                <button id="resetBtn" style="background: #64748B; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.85rem;">Reset Layout</button>
+            </div>
+        </div>
+
+        <!-- Graph Container -->
+        <div style="background: white; border-radius: 8px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <svg id="graphSvg" style="width: 100%; height: 600px; background: #f9fafb;"></svg>
+        </div>
+
+        <!-- Legend -->
+        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 40px;">
+            <h3 style="color: #0D1B2A; margin-bottom: 15px; font-weight: bold;">Legend</h3>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                <div>
+                    <div style="color: #0D1B2A; font-weight: 600; font-size: 0.9rem; margin-bottom: 10px;">Node Colors (Outcome)</div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #16A34A;"></div>
+                        <span style="color: #64748B; font-size: 0.85rem;">Allowed</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #DC2626;"></div>
+                        <span style="color: #64748B; font-size: 0.85rem;">Dismissed</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #9CA3AF;"></div>
+                        <span style="color: #64748B; font-size: 0.85rem;">Other</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
+                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #B8973A; border: 3px solid #B8973A;"></div>
+                        <span style="color: #64748B; font-size: 0.85rem;">Focal case</span>
+                    </div>
+                </div>
+                <div>
+                    <div style="color: #0D1B2A; font-weight: 600; font-size: 0.9rem; margin-bottom: 10px;">Edge Colors (Relationship)</div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                        <div style="width: 20px; height: 2px; background: #16A34A;"></div>
+                        <span style="color: #64748B; font-size: 0.85rem;">Followed</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                        <div style="width: 20px; height: 2px; background: #F97316;"></div>
+                        <span style="color: #64748B; font-size: 0.85rem;">Distinguished</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                        <div style="width: 20px; height: 2px; background: #DC2626;"></div>
+                        <span style="color: #64748B; font-size: 0.85rem;">Overruled</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 20px; height: 2px; background: #3B82F6;"></div>
+                        <span style="color: #64748B; font-size: 0.85rem;">Considered</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script>
+const focalId = '{{ judgment.id }}';
+let graphData = null;
+let simulation = null;
+let svg = null;
+let g = null;
+
+async function loadGraph(depth = 1) {
+    try {
+        const response = await fetch(`/judgments/api/citations/${focalId}/graph?depth=${depth}`);
+        graphData = await response.json();
+        renderGraph();
+    } catch (error) {
+        console.error('Failed to load graph:', error);
+    }
+}
+
+function renderGraph() {
+    if (!graphData) return;
+
+    const width = document.getElementById('graphSvg').clientWidth;
+    const height = document.getElementById('graphSvg').clientHeight;
+
+    // Clear previous
+    d3.select('#graphSvg').selectAll('*').remove();
+
+    svg = d3.select('#graphSvg');
+    g = svg.append('g');
+
+    // Zoom behavior
+    const zoom = d3.zoom().on('zoom', (event) => {
+        g.attr('transform', event.transform);
+    });
+    svg.call(zoom);
+
+    // Force simulation
+    simulation = d3.forceSimulation(graphData.nodes)
+        .force('link', d3.forceLink(graphData.edges)
+            .id(d => d.id)
+            .distance(100))
+        .force('charge', d3.forceManyBody().strength(-300))
+        .force('center', d3.forceCenter(width / 2, height / 2))
+        .force('collision', d3.forceCollide().radius(d => d.radius + 10));
+
+    // Filter edges based on checkboxes
+    const activeRelationships = Array.from(document.querySelectorAll('.relationship-filter:checked'))
+        .map(el => el.value);
+    const filteredEdges = graphData.edges.filter(e => activeRelationships.includes(e.relationship));
+
+    // Links
+    const link = g.selectAll('line')
+        .data(filteredEdges)
+        .enter().append('line')
+        .attr('stroke', d => d.color)
+        .attr('stroke-width', 2)
+        .attr('marker-end', 'url(#arrowhead)');
+
+    // Arrow marker for directed edges
+    svg.append('defs').append('marker')
+        .attr('id', 'arrowhead')
+        .attr('markerWidth', 10)
+        .attr('markerHeight', 10)
+        .attr('refX', 20)
+        .attr('refY', 3)
+        .attr('orient', 'auto')
+        .append('polygon')
+        .attr('points', '0 0, 10 3, 0 6')
+        .attr('fill', '#9CA3AF');
+
+    // Nodes
+    const node = g.selectAll('circle')
+        .data(graphData.nodes)
+        .enter().append('circle')
+        .attr('r', d => d.radius)
+        .attr('fill', d => d.color)
+        .attr('stroke', d => d.is_focal ? d.color : 'white')
+        .attr('stroke-width', d => d.is_focal ? 4 : 2)
+        .call(d3.drag()
+            .on('start', dragstarted)
+            .on('drag', dragged)
+            .on('end', dragended))
+        .on('click', (event, d) => {
+            window.location.href = `/judgments/${d.id}/graph`;
+        })
+        .on('dblclick', (event, d) => {
+            event.stopPropagation();
+            if (graphData.depth < 3) {
+                document.getElementById('depthSelect').value = graphData.depth + 1;
+                document.getElementById('depthSelect').dispatchEvent(new Event('change'));
+            }
+        });
+
+    // Node labels
+    const labels = g.selectAll('text')
+        .data(graphData.nodes)
+        .enter().append('text')
+        .attr('text-anchor', 'middle')
+        .attr('dy', '.35em')
+        .attr('font-size', '11px')
+        .attr('fill', 'white')
+        .attr('font-weight', 'bold')
+        .attr('pointer-events', 'none')
+        .text(d => {
+            const parts = d.label.split(' ');
+            return parts.slice(0, 2).join(' ');
+        });
+
+    // Tooltips
+    node.append('title')
+        .text(d => `${d.label}\n${d.title}\nCourt: ${d.court}\nCitations: ${d.citation_count}`);
+
+    // Update positions
+    simulation.on('tick', () => {
+        link
+            .attr('x1', d => d.source.x)
+            .attr('y1', d => d.source.y)
+            .attr('x2', d => d.target.x)
+            .attr('y2', d => d.target.y);
+
+        node
+            .attr('cx', d => d.x)
+            .attr('cy', d => d.y);
+
+        labels
+            .attr('x', d => d.x)
+            .attr('y', d => d.y);
+    });
+
+    // Drag functions
+    function dragstarted(event, d) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+    }
+
+    function dragged(event, d) {
+        d.fx = event.x;
+        d.fy = event.y;
+    }
+
+    function dragended(event, d) {
+        if (!event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+    }
+}
+
+// Event listeners
+document.getElementById('depthSelect').addEventListener('change', (e) => {
+    loadGraph(parseInt(e.target.value));
+});
+
+document.querySelectorAll('.relationship-filter').forEach(checkbox => {
+    checkbox.addEventListener('change', renderGraph);
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+    loadGraph(parseInt(document.getElementById('depthSelect').value));
+});
+
+document.getElementById('exportBtn').addEventListener('click', () => {
+    html2canvas(document.getElementById('graphSvg')).then(canvas => {
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/png');
+        link.download = `citation-graph-${focalId}.png`;
+        link.click();
+    });
+});
+
+// Load initial graph
+loadGraph(1);
+</script>
+{% endblock %}
