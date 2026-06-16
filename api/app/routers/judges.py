@@ -8,6 +8,7 @@ from app.models.court import Court
 from app.models.judge_profile import JudgeProfile
 from app.models.case import Case
 from app.schemas.judges import JudgeListItem, JudgeDetail, JudgeProfileData, JudgeCaseResult
+from app.analytics.judges import compute_judge_profile
 
 router = APIRouter(prefix="/judges", tags=["judges"])
 
@@ -98,6 +99,44 @@ async def get_judge_detail(
         court_name=row.court_name,
         court_type=row.court_type,
         profile=profile_data,
+    )
+
+@router.get("/{judge_id}/analytics", response_model=JudgeProfileData)
+async def get_judge_analytics(
+    judge_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    # Check if judge exists
+    judge_query = select(Judge).where(Judge.id == judge_id)
+    judge_result = await db.execute(judge_query)
+    if not judge_result.scalar_one_or_none():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Judge not found",
+        )
+
+    # Get or compute judge profile
+    profile_query = select(JudgeProfile).where(JudgeProfile.judge_id == judge_id)
+    profile_result = await db.execute(profile_query)
+    profile = profile_result.scalar_one_or_none()
+
+    if not profile:
+        # Try to compute profile
+        profile = await compute_judge_profile(judge_id, db)
+
+    if not profile:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Not enough case data to generate analytics",
+        )
+
+    return JudgeProfileData(
+        total_decisions=profile.total_decisions,
+        plaintiff_favourable_rate=profile.plaintiff_favourable_rate,
+        avg_disposal_days=profile.avg_disposal_days,
+        interlocutory_grant_rate=profile.interlocutory_grant_rate,
+        costs_awarded_rate=profile.costs_awarded_rate,
+        top_practice_areas=profile.top_practice_areas,
     )
 
 @router.get("/{judge_id}/cases", response_model=List[JudgeCaseResult])
