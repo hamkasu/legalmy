@@ -1,0 +1,402 @@
+{% extends "base.html" %}
+
+{% block title %}Search Judgments, Legislation & Judges - LegalMY{% endblock %}
+
+{% block content %}
+<div class="container-fluid search-container">
+    <!-- Hero Search Bar -->
+    <div class="search-hero" style="background: linear-gradient(135deg, #0D1B2A 0%, #1a2f4d 100%); color: white; padding: 60px 20px; text-align: center; margin: -20px -15px 40px -15px;">
+        <h1 style="font-size: 2.5rem; margin-bottom: 10px;">Malaysia's Legal Intelligence</h1>
+        <p style="font-size: 1.1rem; margin-bottom: 30px; opacity: 0.9;">Search 100,000+ judgments, statutes, judges & lawyers</p>
+
+        <!-- Search Bar -->
+        <div class="search-bar-wrapper" style="max-width: 700px; margin: 0 auto;">
+            <form id="search-form" style="display: flex; gap: 10px;">
+                <input type="text" id="search-query" class="form-control" placeholder="E.g. 'negligence contract' or '[2024] 3 CLJ 101'" style="font-size: 1.1rem;">
+                <button type="submit" class="btn btn-warning" style="background-color: #B8973A; border-color: #B8973A; color: #0D1B2A; font-weight: 600; padding: 10px 30px;">
+                    Search
+                </button>
+            </form>
+        </div>
+
+        <!-- Search Type Tabs -->
+        <div style="margin-top: 20px;">
+            <button class="btn btn-sm" style="background-color: transparent; color: white; border: 1px solid white; margin: 0 5px;" id="tab-judgments" onclick="setSearchType('judgments')">
+                Judgments
+            </button>
+            <button class="btn btn-sm" style="background-color: transparent; color: white; border: 1px solid white; margin: 0 5px;" id="tab-legislation" onclick="setSearchType('legislation')">
+                Legislation
+            </button>
+            <button class="btn btn-sm" style="background-color: transparent; color: white; border: 1px solid white; margin: 0 5px;" id="tab-judges" onclick="setSearchType('judges')">
+                Judges
+            </button>
+            <button class="btn btn-sm" style="background-color: transparent; color: white; border: 1px solid white; margin: 0 5px;" id="tab-lawyers" onclick="setSearchType('lawyers')">
+                Lawyers
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Sidebar: Filters -->
+        <div class="col-md-3">
+            <div class="filters-panel">
+                <h5 style="color: #0D1B2A; font-weight: bold; border-bottom: 2px solid #B8973A; padding-bottom: 10px; margin-bottom: 20px;">
+                    Filters
+                </h5>
+
+                <!-- Court Level Filter -->
+                <div class="filter-section">
+                    <h6 style="cursor: pointer; color: #0D1B2A;" onclick="toggleFilter(this)">
+                        ▼ Court Level
+                    </h6>
+                    <div class="filter-options">
+                        {% for level in court_levels %}
+                        <label style="display: block; margin: 8px 0;">
+                            <input type="checkbox" class="filter-court-level" value="{{ level }}">
+                            {{ level }}
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Location Filter -->
+                <div class="filter-section">
+                    <h6 style="cursor: pointer; color: #0D1B2A;" onclick="toggleFilter(this)">
+                        ▼ Court Location
+                    </h6>
+                    <div class="filter-options">
+                        {% for state in states %}
+                        <label style="display: block; margin: 8px 0;">
+                            <input type="checkbox" class="filter-court-location" value="{{ state }}">
+                            {{ state }}
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Date Range Filter -->
+                <div class="filter-section">
+                    <h6 style="cursor: pointer; color: #0D1B2A;" onclick="toggleFilter(this)">
+                        ▼ Date Range
+                    </h6>
+                    <div class="filter-options">
+                        <label>From:
+                            <input type="date" id="date-from" class="form-control form-control-sm">
+                        </label>
+                        <label style="margin-top: 10px;">To:
+                            <input type="date" id="date-to" class="form-control form-control-sm">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Outcome Filter -->
+                <div class="filter-section">
+                    <h6 style="cursor: pointer; color: #0D1B2A;" onclick="toggleFilter(this)">
+                        ▼ Outcome
+                    </h6>
+                    <div class="filter-options">
+                        {% for outcome in outcomes %}
+                        <label style="display: block; margin: 8px 0;">
+                            <input type="checkbox" class="filter-outcome" value="{{ outcome }}">
+                            {{ outcome }}
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Citation Filter -->
+                <div class="filter-section">
+                    <h6 style="color: #0D1B2A;">Citation</h6>
+                    <input type="text" id="filter-citation" class="form-control form-control-sm" placeholder="E.g. [2024] 3 CLJ">
+                </div>
+
+                <button class="btn btn-sm btn-outline-secondary" onclick="resetFilters()" style="width: 100%; margin-top: 20px;">
+                    Reset Filters
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="col-md-6">
+            <div id="results-container">
+                <div style="text-align: center; padding: 40px; color: #64748B;">
+                    <p>Enter a search term above to get started</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar: Facets -->
+        <div class="col-md-3">
+            <div class="facets-panel">
+                <h5 style="color: #0D1B2A; font-weight: bold; border-bottom: 2px solid #B8973A; padding-bottom: 10px; margin-bottom: 20px;">
+                    Results Overview
+                </h5>
+
+                <div id="facets-container" style="text-align: center; color: #64748B;">
+                    <p>Run a search to see facets</p>
+                </div>
+
+                <!-- Year Histogram -->
+                <div style="margin-top: 30px;">
+                    <h6 style="color: #0D1B2A; font-weight: bold;">Judgments by Year</h6>
+                    <canvas id="year-chart" height="100"></canvas>
+                </div>
+
+                <!-- Subject Matter Donut -->
+                <div style="margin-top: 30px;">
+                    <h6 style="color: #0D1B2A; font-weight: bold;">Subject Matter</h6>
+                    <canvas id="subject-chart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .search-container {
+        margin: 0;
+        padding: 0;
+    }
+
+    .filters-panel, .facets-panel {
+        background: white;
+        padding: 20px;
+        border-left: 4px solid #B8973A;
+        border-radius: 4px;
+        margin-bottom: 20px;
+    }
+
+    .filter-section {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .filter-section:last-child {
+        border-bottom: none;
+    }
+
+    .filter-options {
+        margin-top: 10px;
+        margin-left: 10px;
+    }
+
+    .judgment-card {
+        border-left: 4px solid #B8973A;
+        padding: 20px;
+        margin-bottom: 15px;
+        background: white;
+        border-radius: 4px;
+        transition: box-shadow 0.3s ease;
+    }
+
+    .judgment-card:hover {
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .judgment-citation {
+        font-family: 'Merriweather', serif;
+        font-size: 1.2rem;
+        color: #0D1B2A;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .judgment-title {
+        font-size: 1rem;
+        color: #0D1B2A;
+        margin-bottom: 10px;
+    }
+
+    .judgment-meta {
+        display: flex;
+        gap: 15px;
+        font-size: 0.9rem;
+        color: #64748B;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+    }
+
+    .badge-outcome {
+        padding: 4px 8px;
+        border-radius: 3px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: white;
+    }
+
+    .badge-outcome.allowed {
+        background-color: #16A34A;
+    }
+
+    .badge-outcome.dismissed {
+        background-color: #DC2626;
+    }
+
+    .badge-outcome.partly_allowed {
+        background-color: #F59E0B;
+    }
+
+    .judgment-summary {
+        color: #64748B;
+        line-height: 1.6;
+        margin-top: 10px;
+    }
+
+    .pagination {
+        margin-top: 30px;
+        justify-content: center;
+    }
+</style>
+
+<!-- Search script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+    let currentSearchType = 'judgments';
+    let currentPage = 1;
+
+    function setSearchType(type) {
+        currentSearchType = type;
+        currentPage = 1;
+        document.querySelectorAll('[id^="tab-"]').forEach(btn => {
+            btn.style.backgroundColor = 'transparent';
+        });
+        document.getElementById('tab-' + type).style.backgroundColor = 'rgba(255,255,255,0.2)';
+    }
+
+    function toggleFilter(element) {
+        const options = element.nextElementSibling;
+        if (options.style.display === 'none') {
+            options.style.display = 'block';
+        } else {
+            options.style.display = 'none';
+        }
+    }
+
+    function getFilters() {
+        return {
+            court_level: Array.from(document.querySelectorAll('.filter-court-level:checked')).map(cb => cb.value),
+            court_location: Array.from(document.querySelectorAll('.filter-court-location:checked')).map(cb => cb.value),
+            date_from: document.getElementById('date-from').value,
+            date_to: document.getElementById('date-to').value,
+            outcome: Array.from(document.querySelectorAll('.filter-outcome:checked')).map(cb => cb.value),
+            citation: document.getElementById('filter-citation').value,
+        };
+    }
+
+    function resetFilters() {
+        document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        document.querySelectorAll('input[type="date"]').forEach(input => input.value = '');
+        document.getElementById('filter-citation').value = '';
+        performSearch();
+    }
+
+    document.getElementById('search-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        currentPage = 1;
+        performSearch();
+    });
+
+    async function performSearch() {
+        const query = document.getElementById('search-query').value.trim();
+        if (!query) {
+            document.getElementById('results-container').innerHTML = '<div style="text-align: center; padding: 40px; color: #64748B;"><p>Enter a search term</p></div>';
+            return;
+        }
+
+        const filters = getFilters();
+        const endpoint = `/search/api/${currentSearchType}`;
+        const payload = {
+            query,
+            ...filters,
+            page: currentPage,
+            per_page: 20,
+        };
+
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                renderResults(data.results, data.total_count, data.pages);
+                if (data.facets) {
+                    renderFacets(data.facets);
+                }
+            } else {
+                document.getElementById('results-container').innerHTML = '<div class="alert alert-danger">Error: ' + data.message + '</div>';
+            }
+        } catch (error) {
+            document.getElementById('results-container').innerHTML = '<div class="alert alert-danger">Network error: ' + error.message + '</div>';
+        }
+    }
+
+    function renderResults(results, totalCount, totalPages) {
+        let html = `<div style="margin-bottom: 20px;"><strong>${totalCount} results found</strong></div>`;
+
+        if (results.length === 0) {
+            html += '<div style="text-align: center; padding: 40px; color: #64748B;"><p>No results found</p></div>';
+        } else {
+            results.forEach(result => {
+                const outcomeBadge = result.outcome ? `<span class="badge-outcome ${result.outcome}">${result.outcome}</span>` : '';
+                const subjectBadges = result.subject_matter.map(s => `<span class="badge badge-secondary">${s}</span>`).join(' ');
+
+                html += `
+                    <div class="judgment-card">
+                        <div class="judgment-citation">${result.citation}</div>
+                        <div class="judgment-title">${result.title}</div>
+                        <div class="judgment-meta">
+                            <span>${result.court_level} • ${result.court_location}</span>
+                            ${result.date_decided ? `<span>${result.date_decided}</span>` : ''}
+                            ${outcomeBadge}
+                        </div>
+                        <div>${subjectBadges}</div>
+                        <div class="judgment-summary">${result.summary.substring(0, 200)}...</div>
+                    </div>
+                `;
+            });
+
+            // Pagination
+            html += `<nav aria-label="Page navigation">
+                <ul class="pagination">`;
+            for (let p = 1; p <= totalPages; p++) {
+                const active = p === currentPage ? 'active' : '';
+                html += `<li class="page-item ${active}"><a class="page-link" href="#" onclick="currentPage=${p}; performSearch(); return false;">${p}</a></li>`;
+            }
+            html += `</ul></nav>`;
+        }
+
+        document.getElementById('results-container').innerHTML = html;
+    }
+
+    function renderFacets(facets) {
+        let html = '<div><strong>Total Results:</strong> ' + Object.values(facets.court_level).reduce((a, b) => a + b, 0) + '</div>';
+        document.getElementById('facets-container').innerHTML = html;
+
+        // Year chart
+        if (Object.keys(facets.year).length > 0) {
+            const years = Object.keys(facets.year).sort();
+            const counts = years.map(y => facets.year[y]);
+            new Chart(document.getElementById('year-chart'), {
+                type: 'bar',
+                data: {
+                    labels: years,
+                    datasets: [{
+                        label: 'Judgments',
+                        data: counts,
+                        backgroundColor: '#B8973A',
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+        }
+    }
+
+    // Initialize
+    setSearchType('judgments');
+</script>
+{% endblock %}
