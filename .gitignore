@@ -1,12 +1,54 @@
+# Python
 __pycache__/
 *.pyc
 *.pyo
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment
 .env
 .env.local
+.env.*.local
+
+# Project specific
+data/raw/
+instance/
+.webassets-cache
+celerybeat-schedule
+instance/
+
+# Node (if used for frontend build)
 node_modules/
 .next/
 dist/
-*.egg-info/
-.venv/
-venv/
-.DS_Store
