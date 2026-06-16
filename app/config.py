@@ -1,6 +1,56 @@
 import os
 from datetime import timedelta
 
+# Subscription Plans - module level for easy importing
+PLANS = {
+    'free': {
+        'name': 'Free',
+        'price_myr': 0,
+        'searches_per_day': 10,
+        'ai_queries_per_month': 0,
+        'judgment_exports': 0,
+        'alerts': 1,
+        'judge_analytics': False,
+        'lawyer_analytics': False,
+    },
+    'starter': {
+        'name': 'Starter',
+        'price_myr': 99,
+        'stripe_price_id': 'price_starter_myr',
+        'searches_per_day': -1,
+        'ai_queries_per_month': 50,
+        'judgment_exports': 50,
+        'alerts': 5,
+        'judge_analytics': True,
+        'lawyer_analytics': False,
+    },
+    'professional': {
+        'name': 'Professional',
+        'price_myr': 299,
+        'stripe_price_id': 'price_professional_myr',
+        'searches_per_day': -1,
+        'ai_queries_per_month': 500,
+        'judgment_exports': -1,
+        'alerts': 25,
+        'judge_analytics': True,
+        'lawyer_analytics': True,
+    },
+    'firm': {
+        'name': 'Firm',
+        'price_myr': 999,
+        'stripe_price_id': 'price_firm_myr',
+        'searches_per_day': -1,
+        'ai_queries_per_month': -1,
+        'judgment_exports': -1,
+        'alerts': -1,
+        'judge_analytics': True,
+        'lawyer_analytics': True,
+        'seats': 10,
+        'api_access': True,
+    },
+}
+
+
 class Config:
     """Base configuration"""
     SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
@@ -39,55 +89,6 @@ class Config:
     CELERY_BROKER_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
     CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
     CELERY_ENABLE_UTC = True
-
-    # Subscription Plans
-    PLANS = {
-        'free': {
-            'name': 'Free',
-            'price_myr': 0,
-            'searches_per_day': 10,
-            'ai_queries_per_month': 0,
-            'judgment_exports': 0,
-            'alerts': 1,
-            'judge_analytics': False,
-            'lawyer_analytics': False,
-        },
-        'starter': {
-            'name': 'Starter',
-            'price_myr': 99,
-            'stripe_price_id': 'price_starter_myr',
-            'searches_per_day': -1,
-            'ai_queries_per_month': 50,
-            'judgment_exports': 50,
-            'alerts': 5,
-            'judge_analytics': True,
-            'lawyer_analytics': False,
-        },
-        'professional': {
-            'name': 'Professional',
-            'price_myr': 299,
-            'stripe_price_id': 'price_professional_myr',
-            'searches_per_day': -1,
-            'ai_queries_per_month': 500,
-            'judgment_exports': -1,
-            'alerts': 25,
-            'judge_analytics': True,
-            'lawyer_analytics': True,
-        },
-        'firm': {
-            'name': 'Firm',
-            'price_myr': 999,
-            'stripe_price_id': 'price_firm_myr',
-            'searches_per_day': -1,
-            'ai_queries_per_month': -1,
-            'judgment_exports': -1,
-            'alerts': -1,
-            'judge_analytics': True,
-            'lawyer_analytics': True,
-            'seats': 10,
-            'api_access': True,
-        },
-    }
 
 
 class DevelopmentConfig(Config):
