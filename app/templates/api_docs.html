@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}API Documentation - LegalMY{% endblock %}
+
+{% block content %}
+<div class="container api-docs" style="padding: 40px 0;">
+    <div style="margin-bottom: 40px;">
+        <h1 style="font-family: 'Merriweather', serif; color: #0D1B2A; margin-bottom: 10px;">API Documentation</h1>
+        <p style="color: #64748B; font-size: 1.1rem;">RESTful API for programmatic access to LegalMY data (Firm plan subscribers only)</p>
+    </div>
+
+    <!-- Quick Start -->
+    <div style="background: white; padding: 30px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #B8973A;">
+        <h2 style="color: #0D1B2A; margin-top: 0;">Getting Started</h2>
+
+        <h4 style="color: #0D1B2A; margin-top: 30px;">1. Authentication</h4>
+        <p style="color: #64748B;">All API requests require an API key in the Authorization header:</p>
+        <pre style="background: #f3f4f6; padding: 15px; border-radius: 4px; overflow-x: auto;"><code>Authorization: Bearer lmy_your_api_key_here</code></pre>
+
+        <p style="color: #64748B; margin-top: 15px;">Generate API keys in your <a href="{{ url_for('auth.profile') }}" style="color: #B8973A; font-weight: 600;">account settings</a>.</p>
+
+        <h4 style="color: #0D1B2A; margin-top: 30px;">2. Base URL</h4>
+        <pre style="background: #f3f4f6; padding: 15px; border-radius: 4px;">https://legalmy.com.my/api/v1</pre>
+
+        <h4 style="color: #0D1B2A; margin-top: 30px;">3. Example Request (cURL)</h4>
+        <pre style="background: #f3f4f6; padding: 15px; border-radius: 4px; overflow-x: auto;"><code>curl -X GET "https://legalmy.com.my/api/v1/judgments?page=1" \
+  -H "Authorization: Bearer lmy_your_api_key" \
+  -H "Content-Type: application/json"</code></pre>
+
+        <h4 style="color: #0D1B2A; margin-top: 30px;">4. Example Request (Python)</h4>
+        <pre style="background: #f3f4f6; padding: 15px; border-radius: 4px; overflow-x: auto;"><code>import requests
+
+headers = {
+    "Authorization": "Bearer lmy_your_api_key",
+    "Content-Type": "application/json"
+}
+
+response = requests.get(
+    "https://legalmy.com.my/api/v1/judgments",
+    headers=headers,
+    params={"page": 1}
+)
+
+data = response.json()
+print(data['data'])</code></pre>
+    </div>
+
+    <!-- Endpoints -->
+    <div style="background: white; padding: 30px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #B8973A;">
+        <h2 style="color: #0D1B2A; margin-top: 0;">Endpoints</h2>
+
+        <!-- Judgments -->
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+            <h3 style="color: #0D1B2A;">Judgments</h3>
+
+            <div style="margin-top: 20px;">
+                <h5 style="color: #0D1B2A; font-family: monospace; background: #f3f4f6; padding: 10px; border-radius: 4px;">GET /judgments</h5>
+                <p style="color: #64748B;">List judgments with filters and pagination</p>
+                <p style="color: #64748B; font-size: 0.9rem;"><strong>Query Parameters:</strong></p>
+                <ul style="color: #64748B;">
+                    <li><code>court_level</code> - Filter by court level</li>
+                    <li><code>date_from</code> - Filter from date (ISO format)</li>
+                    <li><code>date_to</code> - Filter to date (ISO format)</li>
+                    <li><code>outcome</code> - Filter by outcome (allowed/dismissed/partly_allowed)</li>
+                    <li><code>page</code> - Page number (default: 1)</li>
+                    <li><code>per_page</code> - Results per page (max: 50, default: 20)</li>
+                </ul>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <h5 style="color: #0D1B2A; font-family: monospace; background: #f3f4f6; padding: 10px; border-radius: 4px;">GET /judgments/&lt;id&gt;</h5>
+                <p style="color: #64748B;">Get full judgment detail with citation graph</p>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <h5 style="color: #0D1B2A; font-family: monospace; background: #f3f4f6; padding: 10px; border-radius: 4px;">GET /judgments/search</h5>
+                <p style="color: #64748B;">Hybrid search (full-text + semantic)</p>
+                <p style="color: #64748B; font-size: 0.9rem;"><strong>Query Parameters:</strong></p>
+                <ul style="color: #64748B;">
+                    <li><code>q</code> - Search query (required)</li>
+                    <li><code>semantic</code> - Enable semantic search (default: true)</li>
+                    <li><code>page</code> - Page number (default: 1)</li>
+                    <li><code>per_page</code> - Results per page (max: 50, default: 20)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Judges -->
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+            <h3 style="color: #0D1B2A;">Judges</h3>
+
+            <div style="margin-top: 20px;">
+                <h5 style="color: #0D1B2A; font-family: monospace; background: #f3f4f6; padding: 10px; border-radius: 4px;">GET /judges</h5>
+                <p style="color: #64748B;">List all judges with basic info</p>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <h5 style="color: #0D1B2A; font-family: monospace; background: #f3f4f6; padding: 10px; border-radius: 4px;">GET /judges/&lt;id&gt;</h5>
+                <p style="color: #64748B;">Get judge profile with analytics</p>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <h5 style="color: #0D1B2A; font-family: monospace; background: #f3f4f6; padding: 10px; border-radius: 4px;">GET /judges/&lt;id&gt;/judgments</h5>
+                <p style="color: #64748B;">Get judgments by a specific judge (paginated)</p>
+            </div>
+        </div>
+
+        <!-- Legislation -->
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+            <h3 style="color: #0D1B2A;">Legislation</h3>
+
+            <div style="margin-top: 20px;">
+                <h5 style="color: #0D1B2A; font-family: monospace; background: #f3f4f6; padding: 10px; border-radius: 4px;">GET /acts</h5>
+                <p style="color: #64748B;">List all Malaysian Acts</p>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <h5 style="color: #0D1B2A; font-family: monospace; background: #f3f4f6; padding: 10px; border-radius: 4px;">GET /acts/&lt;id&gt;/sections</h5>
+                <p style="color: #64748B;">Get all sections of a specific Act</p>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <h5 style="color: #0D1B2A; font-family: monospace; background: #f3f4f6; padding: 10px; border-radius: 4px;">GET /legislation/search</h5>
+                <p style="color: #64748B;">Search legislation by keyword</p>
+            </div>
+        </div>
+
+        <!-- Citation Graph -->
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+            <h3 style="color: #0D1B2A;">Citation Graph</h3>
+
+            <div style="margin-top: 20px;">
+                <h5 style="color: #0D1B2A; font-family: monospace; background: #f3f4f6; padding: 10px; border-radius: 4px;">GET /citations/&lt;judgment_id&gt;/citing</h5>
+                <p style="color: #64748B;">Get cases that cite this judgment</p>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <h5 style="color: #0D1B2A; font-family: monospace; background: #f3f4f6; padding: 10px; border-radius: 4px;">GET /citations/&lt;judgment_id&gt;/cited</h5>
+                <p style="color: #64748B;">Get cases cited by this judgment</p>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <h5 style="color: #0D1B2A; font-family: monospace; background: #f3f4f6; padding: 10px; border-radius: 4px;">GET /citations/&lt;judgment_id&gt;/graph</h5>
+                <p style="color: #64748B;">Get full citation network for graph rendering (nodes & edges)</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Response Format -->
+    <div style="background: white; padding: 30px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #B8973A;">
+        <h2 style="color: #0D1B2A; margin-top: 0;">Response Format</h2>
+
+        <h4 style="color: #0D1B2A; margin-top: 20px;">Success Response</h4>
+        <pre style="background: #f3f4f6; padding: 15px; border-radius: 4px; overflow-x: auto;"><code>{
+  "status": "success",
+  "data": { ... },
+  "meta": {
+    "api_version": "1.0",
+    "request_id": "uuid",
+    "usage": {
+      "requests_today": 47,
+      "requests_limit": 1000
+    }
+  }
+}</code></pre>
+
+        <h4 style="color: #0D1B2A; margin-top: 30px;">Error Response</h4>
+        <pre style="background: #f3f4f6; padding: 15px; border-radius: 4px; overflow-x: auto;"><code>{
+  "status": "error",
+  "error": {
+    "code": "RATE_LIMIT_EXCEEDED",
+    "message": "You have exceeded your daily API quota of 1000 requests.",
+    "upgrade_url": "https://legalmy.com.my/pricing"
+  },
+  "meta": { ... }
+}</code></pre>
+
+        <h4 style="color: #0D1B2A; margin-top: 30px;">HTTP Status Codes</h4>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+            <tr style="border-bottom: 1px solid #e5e7eb;">
+                <td style="padding: 10px; color: #0D1B2A; font-weight: 600;">200</td>
+                <td style="padding: 10px; color: #64748B;">Success</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #e5e7eb;">
+                <td style="padding: 10px; color: #0D1B2A; font-weight: 600;">401</td>
+                <td style="padding: 10px; color: #64748B;">Unauthorized (missing/invalid API key)</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #e5e7eb;">
+                <td style="padding: 10px; color: #0D1B2A; font-weight: 600;">402</td>
+                <td style="padding: 10px; color: #64748B;">Payment Required (not on Firm plan)</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #e5e7eb;">
+                <td style="padding: 10px; color: #0D1B2A; font-weight: 600;">404</td>
+                <td style="padding: 10px; color: #64748B;">Not Found</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; color: #0D1B2A; font-weight: 600;">429</td>
+                <td style="padding: 10px; color: #64748B;">Rate Limit Exceeded</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Rate Limits -->
+    <div style="background: white; padding: 30px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #B8973A;">
+        <h2 style="color: #0D1B2A; margin-top: 0;">Rate Limits</h2>
+        <p style="color: #64748B;">Firm plan subscribers get <strong>1,000 requests per day</strong>. The daily quota resets at 00:00 UTC.</p>
+        <p style="color: #64748B; margin-top: 15px;">Current usage is returned in the <code>meta.usage</code> field of every response.</p>
+    </div>
+</div>
+{% endblock %}
