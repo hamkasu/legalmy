@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us - LegalMY{% endblock %}
+
+{% block content %}
+<div style="padding: 40px 0;">
+    <div class="container" style="max-width: 800px;">
+        <div style="margin-bottom: 40px;">
+            <h1 style="font-family: 'Merriweather', serif; color: #0D1B2A; margin-bottom: 10px;">Contact Us</h1>
+            <p style="color: #64748B; font-size: 1.1rem;">We'd love to hear from you. Get in touch with our team.</p>
+        </div>
+
+        <div style="background: white; padding: 40px; border-radius: 8px; border-left: 4px solid #B8973A;">
+            <form method="POST">
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="name" style="font-weight: 600; color: #0D1B2A; display: block; margin-bottom: 8px;">Full Name</label>
+                    <input type="text" class="form-control" id="name" name="name" required style="border-radius: 4px; padding: 10px 12px; border: 1px solid #e5e7eb;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="email" style="font-weight: 600; color: #0D1B2A; display: block; margin-bottom: 8px;">Email Address</label>
+                    <input type="email" class="form-control" id="email" name="email" required style="border-radius: 4px; padding: 10px 12px; border: 1px solid #e5e7eb;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="message" style="font-weight: 600; color: #0D1B2A; display: block; margin-bottom: 8px;">Message</label>
+                    <textarea class="form-control" id="message" name="message" rows="8" required style="border-radius: 4px; padding: 10px 12px; border: 1px solid #e5e7eb; font-family: inherit;"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; background-color: #B8973A; border-color: #B8973A; color: #0D1B2A; font-weight: 600; padding: 12px; border-radius: 4px;">
+                    Send Message
+                </button>
+            </form>
+        </div>
+
+        <div style="background: #f3f4f6; padding: 40px; border-radius: 8px; margin-top: 40px;">
+            <h3 style="color: #0D1B2A; margin-top: 0; margin-bottom: 20px;">Other Ways to Reach Us</h3>
+
+            <div style="margin-bottom: 20px;">
+                <h5 style="color: #0D1B2A; margin-bottom: 8px;">Email</h5>
+                <p style="color: #64748B; margin: 0;">
+                    <a href="mailto:support@legalmy.com.my" style="color: #B8973A; text-decoration: none; font-weight: 600;">support@legalmy.com.my</a>
+                </p>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <h5 style="color: #0D1B2A; margin-bottom: 8px;">Company</h5>
+                <p style="color: #64748B; margin: 0;">
+                    Calmic Sdn Bhd<br>
+                    Malaysia<br>
+                    SSM: 202201031605
+                </p>
+            </div>
+
+            <div>
+                <h5 style="color: #0D1B2A; margin-bottom: 8px;">Quick Links</h5>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li style="margin-bottom: 8px;">
+                        <a href="{{ url_for('landing.about') }}" style="color: #B8973A; text-decoration: none;">About Us</a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('pricing.index') }}" style="color: #B8973A; text-decoration: none;">Pricing</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+
+{% block title %}Malaysia's Legal Intelligence Platform - LegalMY{% endblock %}
+
+{% block content %}
+<style>
+    .hero-section { min-height: 100vh; display: flex; align-items: center; background: linear-gradient(135deg, #0D1B2A 0%, #1a2f4d 100%); color: white; padding: 60px 20px; }
+    .hero-content { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; max-width: 1200px; margin: 0 auto; }
+    .hero-text h1 { font-family: 'Merriweather', serif; font-size: 3.5rem; line-height: 1.2; margin-bottom: 20px; }
+    .hero-text p { font-size: 1.2rem; opacity: 0.9; margin-bottom: 30px; }
+    .hero-buttons { display: flex; gap: 15px; margin-bottom: 40px; }
+    .hero-buttons .btn { padding: 12px 30px; font-size: 1rem; font-weight: 600; border-radius: 4px; text-decoration: none; display: inline-block; }
+    .hero-buttons .btn-primary { background: #B8973A; color: #0D1B2A; border: 2px solid #B8973A; }
+    .hero-buttons .btn-ghost { background: transparent; color: white; border: 2px solid white; }
+    .hero-buttons .btn:hover { opacity: 0.9; }
+    .typewriter { font-family: monospace; height: 80px; background: rgba(255,255,255,0.1); padding: 20px; border-radius: 4px; border-left: 4px solid #B8973A; display: flex; align-items: center; }
+    .typewriter-text { min-height: 60px; }
+
+    .stats-section { background: white; padding: 60px 20px; }
+    .stats-container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; text-align: center; }
+    .stat-card h3 { font-size: 2.5rem; font-weight: bold; color: #B8973A; margin-bottom: 10px; }
+    .stat-card p { color: #64748B; font-size: 1.1rem; }
+
+    .features-section { padding: 80px 20px; background: #f9fafb; }
+    .features-container { max-width: 1200px; margin: 0 auto; }
+    .features-header { text-align: center; margin-bottom: 60px; }
+    .features-header h2 { font-family: 'Merriweather', serif; font-size: 2.5rem; color: #0D1B2A; margin-bottom: 10px; }
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+    .feature-card { background: white; padding: 40px; border-radius: 8px; border-top: 4px solid #B8973A; text-align: center; transition: transform 0.3s; }
+    .feature-card:hover { transform: translateY(-10px); }
+    .feature-card .icon { font-size: 3rem; margin-bottom: 20px; }
+    .feature-card h4 { color: #0D1B2A; font-weight: bold; margin-bottom: 15px; }
+    .feature-card p { color: #64748B; line-height: 1.6; }
+
+    .testimonials-section { padding: 80px 20px; background: white; }
+    .testimonials-container { max-width: 1200px; margin: 0 auto; }
+    .testimonials-header { text-align: center; margin-bottom: 60px; }
+    .testimonials-header h2 { font-family: 'Merriweather', serif; font-size: 2.5rem; color: #0D1B2A; margin-bottom: 10px; }
+    .testimonials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+    .testimonial-card { background: #f9fafb; padding: 30px; border-radius: 8px; border-left: 4px solid #B8973A; }
+    .testimonial-quote { color: #0D1B2A; font-size: 1.1rem; margin-bottom: 20px; font-style: italic; }
+    .testimonial-author { font-weight: 600; color: #0D1B2A; margin-bottom: 5px; }
+    .testimonial-role { color: #64748B; font-size: 0.9rem; }
+    .illustration-badge { background: #F3F4F6; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; color: #F59E0B; font-weight: 600; display: inline-block; margin-bottom: 10px; }
+
+    .courts-section { padding: 80px 20px; background: linear-gradient(135deg, #0D1B2A 0%, #1a2f4d 100%); color: white; }
+    .courts-container { max-width: 1200px; margin: 0 auto; }
+    .courts-header { text-align: center; margin-bottom: 50px; }
+    .courts-header h2 { font-family: 'Merriweather', serif; font-size: 2.5rem; margin-bottom: 10px; }
+    .courts-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    .court-badge { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.2); }
+    .court-status { font-size: 1.5rem; margin-bottom: 10px; }
+    .court-name { font-weight: 600; font-size: 0.95rem; }
+
+    .pricing-preview { padding: 80px 20px; background: white; }
+    .pricing-container { max-width: 1200px; margin: 0 auto; }
+    .pricing-header { text-align: center; margin-bottom: 50px; }
+    .pricing-header h2 { font-family: 'Merriweather', serif; font-size: 2.5rem; color: #0D1B2A; margin-bottom: 10px; }
+    .pricing-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+    .pricing-card { background: white; padding: 30px; border-radius: 8px; border: 2px solid #e5e7eb; text-align: center; }
+    .pricing-card.featured { border: 3px solid #B8973A; box-shadow: 0 10px 30px rgba(184, 151, 58, 0.2); }
+    .pricing-card .plan-name { font-size: 1.3rem; font-weight: bold; color: #0D1B2A; margin-bottom: 15px; }
+    .pricing-card .price { font-size: 2.5rem; font-weight: bold; color: #B8973A; margin-bottom: 5px; }
+    .pricing-card .period { color: #64748B; font-size: 0.9rem; margin-bottom: 20px; }
+    .pricing-card ul { list-style: none; padding: 0; margin: 20px 0; text-align: left; }
+    .pricing-card li { color: #64748B; padding: 10px 0; border-bottom: 1px solid #f3f4f6; }
+    .pricing-card li:last-child { border-bottom: none; }
+    .pricing-button { display: inline-block; margin-top: 20px; padding: 12px 30px; background: #B8973A; color: white; text-decoration: none; border-radius: 4px; font-weight: 600; }
+    .pricing-button:hover { opacity: 0.9; }
+
+    @media (max-width: 768px) {
+        .hero-content { grid-template-columns: 1fr; }
+        .hero-text h1 { font-size: 2.5rem; }
+        .stats-container { grid-template-columns: 1fr; }
+        .features-grid { grid-template-columns: 1fr; }
+        .testimonials-grid { grid-template-columns: 1fr; }
+        .courts-grid { grid-template-columns: repeat(2, 1fr); }
+        .pricing-cards { grid-template-columns: 1fr; }
+    }
+</style>
+
+<!-- HERO SECTION -->
+<div class="hero-section">
+    <div class="hero-content">
+        <div class="hero-text">
+            <h1>Malaysia's Legal Intelligence Platform</h1>
+            <p>Search 100,000+ Malaysian court judgments. Analyse judges. Research opposing counsel. Powered by AI.</p>
+            <div class="hero-buttons">
+                <a href="{% if current_user.is_authenticated %}{{ url_for('dashboard.index') }}{% else %}{{ url_for('auth.register') }}{% endif %}" class="btn btn-primary">
+                    Start Free
+                </a>
+                <a href="{{ url_for('pricing.index') }}" class="btn btn-ghost">See Pricing</a>
+            </div>
+        </div>
+        <div class="typewriter">
+            <div class="typewriter-text">
+                <div id="typewriter-line"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- STATS SECTION -->
+<div class="stats-section">
+    <div class="stats-container">
+        <div class="stat-card">
+            <h3 id="stat-1">0</h3>
+            <p>Judgments Indexed</p>
+        </div>
+        <div class="stat-card">
+            <h3 id="stat-2">0</h3>
+            <p>States Covered</p>
+        </div>
+        <div class="stat-card">
+            <h3 id="stat-3">0</h3>
+            <p>Judges Profiled</p>
+        </div>
+        <div class="stat-card">
+            <h3 id="stat-4">0</h3>
+            <p>Years of Case Law</p>
+        </div>
+    </div>
+</div>
+
+<!-- FEATURES SECTION -->
+<div class="features-section">
+    <div class="features-container">
+        <div class="features-header">
+            <h2>Powerful Features</h2>
+            <p style="color: #64748B; font-size: 1.1rem;">Everything you need for Malaysian legal research</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="icon">🔍</div>
+                <h4>Judgment Search</h4>
+                <p>Full-text + AI semantic search across all Malaysian courts including Syariah and Industrial Court</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">⚖️</div>
+                <h4>Judge Analytics</h4>
+                <p>Understand any judge's ruling tendencies, win rates by subject matter, and landmark decisions</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🤖</div>
+                <h4>AI Legal Tools</h4>
+                <p>Draft arguments, summarise judgments, build case timelines — trained on Malaysian law</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">📜</div>
+                <h4>Legislation Browser</h4>
+                <p>All Acts of Malaysia with case cross-references and plain-language AI explanations</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🔗</div>
+                <h4>Citation Graph</h4>
+                <p>See how cases connect. Find the leading case in any area of Malaysian law instantly</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🔔</div>
+                <h4>Smart Alerts</h4>
+                <p>Monitor new judgments matching your practice areas. Never miss a relevant decision</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TESTIMONIALS SECTION -->
+<div class="testimonials-section">
+    <div class="testimonials-container">
+        <div class="testimonials-header">
+            <h2>Trusted by Malaysian Lawyers</h2>
+            <p style="color: #64748B; font-size: 1.1rem;">Join 500+ legal professionals using LegalMY</p>
+        </div>
+
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <div class="illustration-badge">ILLUSTRATIVE</div>
+                <div class="testimonial-quote">
+                    "LegalMY has transformed how I research case law. What used to take hours now takes minutes. The judge analytics feature is invaluable for trial prep."
+                </div>
+                <div class="testimonial-author">Sarah Lim</div>
+                <div class="testimonial-role">Litigation Partner, KL</div>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="illustration-badge">ILLUSTRATIVE</div>
+                <div class="testimonial-quote">
+                    "As a solo practitioner, I can't afford expensive legal databases. LegalMY gives me access to the same intelligence at a fraction of the cost."
+                </div>
+                <div class="testimonial-author">Ravi Krishnan</div>
+                <div class="testimonial-role">Solo Practitioner, Penang</div>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="illustration-badge">ILLUSTRATIVE</div>
+                <div class="testimonial-quote">
+                    "The AI tools have become essential for our legal team. The case summariser and argument generator save us countless hours every week."
+                </div>
+                <div class="testimonial-author">Fatimah Hassan</div>
+                <div class="testimonial-role">In-House Counsel, GLC</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- COURT COVERAGE SECTION -->
+<div class="courts-section">
+    <div class="courts-container">
+        <div class="courts-header">
+            <h2>Comprehensive Court Coverage</h2>
+            <p style="opacity: 0.9;">All Malaysian courts covered with ongoing expansion</p>
+        </div>
+
+        <div class="courts-grid">
+            <div class="court-badge">
+                <div class="court-status">✅</div>
+                <div class="court-name">Federal Court</div>
+            </div>
+            <div class="court-badge">
+                <div class="court-status">✅</div>
+                <div class="court-name">Court of Appeal</div>
+            </div>
+            <div class="court-badge">
+                <div class="court-status">✅</div>
+                <div class="court-name">High Court</div>
+            </div>
+            <div class="court-badge">
+                <div class="court-status">✅</div>
+                <div class="court-name">Industrial Court</div>
+            </div>
+            <div class="court-badge">
+                <div class="court-status">⏳</div>
+                <div class="court-name">Sessions Court (Q3 2026)</div>
+            </div>
+            <div class="court-badge">
+                <div class="court-status">✅</div>
+                <div class="court-name">Syariah High Court</div>
+            </div>
+            <div class="court-badge">
+                <div class="court-status">⏳</div>
+                <div class="court-name">Syariah Appeal (Q3 2026)</div>
+            </div>
+            <div class="court-badge">
+                <div class="court-status">⏳</div>
+                <div class="court-name">Magistrates' Court (Q4 2026)</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PRICING PREVIEW SECTION -->
+<div class="pricing-preview">
+    <div class="pricing-container">
+        <div class="pricing-header">
+            <h2>Simple, Transparent Pricing</h2>
+            <p style="color: #64748B; font-size: 1.1rem;">Start free. Scale as you grow.</p>
+        </div>
+
+        <div class="pricing-cards">
+            <div class="pricing-card">
+                <div class="plan-name">Free</div>
+                <div class="price">RM 0</div>
+                <div class="period">/month</div>
+                <ul>
+                    <li>✓ 10 searches/day</li>
+                    <li>✓ Basic judgment view</li>
+                    <li>✓ 1 saved search</li>
+                    <li>✗ No AI tools</li>
+                    <li>✗ No judge analytics</li>
+                </ul>
+                <a href="{% if current_user.is_authenticated %}{{ url_for('dashboard.index') }}{% else %}{{ url_for('auth.register') }}{% endif %}" class="pricing-button">Get Started</a>
+            </div>
+
+            <div class="pricing-card featured">
+                <div style="position: absolute; top: -15px; left: 20px; background: #B8973A; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">RECOMMENDED</div>
+                <div class="plan-name">Professional</div>
+                <div class="price">RM 299</div>
+                <div class="period">/month</div>
+                <ul>
+                    <li>✓ Unlimited searches</li>
+                    <li>✓ 500 AI queries/month</li>
+                    <li>✓ Judge + Lawyer analytics</li>
+                    <li>✓ 25 saved searches</li>
+                    <li>✓ Unlimited exports</li>
+                </ul>
+                <a href="{% if current_user.is_authenticated %}{{ url_for('auth.upgrade_plan', plan='professional') }}{% else %}{{ url_for('pricing.index') }}{% endif %}" class="pricing-button">Start Free Trial</a>
+            </div>
+
+            <div class="pricing-card">
+                <div class="plan-name">Firm</div>
+                <div class="price">RM 999</div>
+                <div class="period">/month</div>
+                <ul>
+                    <li>✓ Unlimited everything</li>
+                    <li>✓ 10 team seats</li>
+                    <li>✓ API access</li>
+                    <li>✓ Priority support</li>
+                    <li>✓ Custom integrations</li>
+                </ul>
+                <a href="{% if current_user.is_authenticated %}{{ url_for('auth.upgrade_plan', plan='firm') }}{% else %}{{ url_for('pricing.index') }}{% endif %}" class="pricing-button">Contact Sales</a>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="{{ url_for('pricing.index') }}" style="color: #B8973A; font-weight: 600; text-decoration: none;">View full pricing details →</a>
+        </div>
+    </div>
+</div>
+
+<!-- CTA SECTION -->
+<div style="background: linear-gradient(135deg, #0D1B2A 0%, #1a2f4d 100%); color: white; padding: 80px 20px; text-align: center;">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <h2 style="font-family: 'Merriweather', serif; font-size: 2.5rem; margin-bottom: 20px;">Ready to Transform Your Legal Practice?</h2>
+        <p style="font-size: 1.1rem; opacity: 0.9; margin-bottom: 30px;">Join hundreds of Malaysian lawyers already using LegalMY</p>
+        <a href="{% if current_user.is_authenticated %}{{ url_for('dashboard.index') }}{% else %}{{ url_for('auth.register') }}{% endif %}" style="display: inline-block; background: #B8973A; color: #0D1B2A; padding: 15px 40px; border-radius: 4px; text-decoration: none; font-weight: 600; font-size: 1.1rem;">
+            Start Free Today
+        </a>
+    </div>
+</div>
+
+<script>
+// Typewriter effect
+const searches = [
+    "Negligence claims in KL High Court 2024...",
+    "Dato' Justice X ruling patterns in contract disputes...",
+    "Cases citing Contracts Act 1950 Section 76...",
+    "Employment law precedents in manufacturing...",
+    "Syariah court family law decisions 2024..."
+];
+
+let currentIndex = 0;
+const typewriterLine = document.getElementById('typewriter-line');
+
+function type() {
+    const text = searches[currentIndex];
+    typewriterLine.innerHTML = '> ' + text;
+    currentIndex = (currentIndex + 1) % searches.length;
+    setTimeout(type, 4000);
+}
+
+type();
+
+// Animated counter
+function countUp(id, target) {
+    const element = document.getElementById(id);
+    const increment = target / 100;
+    let current = 0;
+    const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+            element.textContent = target.toLocaleString() + (id === 'stat-2' ? '' : id === 'stat-3' ? '+' : '+');
+            clearInterval(timer);
+        } else {
+            element.textContent = Math.floor(current).toLocaleString() + (id === 'stat-4' ? '' : '+');
+        }
+    }, 30);
+}
+
+// Trigger count-up on scroll
+window.addEventListener('scroll', () => {
+    const statsSection = document.querySelector('.stats-section');
+    const rect = statsSection.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0 && !window.statsStarted) {
+        window.statsStarted = true;
+        countUp('stat-1', 100000);
+        countUp('stat-2', 15);
+        countUp('stat-3', 1200);
+        countUp('stat-4', 47);
+    }
+});
+</script>
+{% endblock %}
