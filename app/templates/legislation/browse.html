@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Legislation - LegalMY{% endblock %}
+
+{% block content %}
+<div class="container legislation-browse" style="padding: 30px 0;">
+    <div style="margin-bottom: 40px;">
+        <h1 style="font-family: 'Merriweather', serif; color: #0D1B2A; margin-bottom: 10px;">📜 Malaysian Legislation</h1>
+        <p style="color: #64748B; font-size: 1.1rem;">Browse Acts and subsidiary legislation</p>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-md-3" style="margin-bottom: 30px;">
+            <div style="background: white; padding: 20px; border-radius: 4px; position: sticky; top: 20px;">
+                <h5 style="color: #0D1B2A; margin-bottom: 20px; font-weight: bold;">Categories</h5>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <a href="/legislation/" style="color: #B8973A; text-decoration: none; font-weight: 500;">
+                        📋 All Acts
+                    </a>
+                    {% for category in categories %}
+                    <a href="#{{ category|replace(' ', '-') }}" style="color: #64748B; text-decoration: none; font-size: 0.95rem;">
+                        → {{ category }}
+                    </a>
+                    {% endfor %}
+                    <hr style="margin: 15px 0;">
+                    <a href="/legislation/subsidiary" style="color: #B8973A; text-decoration: none; font-weight: 500;">
+                        📜 Subsidiary Legislation
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9">
+            {% if acts_by_category %}
+                {% for category in categories %}
+                {% set acts = acts_by_category.get(category, []) %}
+                {% if acts %}
+                <div style="margin-bottom: 50px;" id="{{ category|replace(' ', '-') }}">
+                    <h3 style="color: #0D1B2A; border-bottom: 3px solid #B8973A; padding-bottom: 10px; margin-bottom: 20px; font-weight: bold;">
+                        {{ category }}
+                    </h3>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+                        {% for act in acts %}
+                        <div class="act-card" style="background: white; padding: 20px; border-left: 4px solid #B8973A; border-radius: 4px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onclick="window.location.href='/legislation/{{ act.id }}'">
+                            <h5 style="color: #0D1B2A; margin-bottom: 8px; font-weight: 600;">{{ act.title }}</h5>
+
+                            <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                                {% if act.year %}
+                                <span class="badge" style="background-color: #0D1B2A; color: white;">
+                                    {{ act.year }}
+                                </span>
+                                {% endif %}
+                                {% if act.repealed_on %}
+                                <span class="badge" style="background-color: #DC2626; color: white;">
+                                    Repealed
+                                </span>
+                                {% else %}
+                                <span class="badge" style="background-color: #16A34A; color: white;">
+                                    Active
+                                </span>
+                                {% endif %}
+                            </div>
+
+                            {% if act.summary %}
+                            <p style="color: #64748B; font-size: 0.9rem; line-height: 1.4; margin-bottom: 0;">
+                                {{ act.summary[:150] }}{% if act.summary|length > 150 %}...{% endif %}
+                            </p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            {% else %}
+            <div style="text-align: center; padding: 60px 20px; color: #64748B;">
+                <p style="font-size: 1.2rem; margin-bottom: 10px;">No acts loaded</p>
+                <p>The legislation database will be populated via the ingestion pipeline.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .act-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}

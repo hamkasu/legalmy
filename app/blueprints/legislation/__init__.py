@@ -1,5 +1,5 @@
 from flask import Blueprint
 
-legislation_bp = Blueprint('legislation', __name__, template_folder='templates')
+legislation_bp = Blueprint('legislation', __name__)
 
 from app.blueprints.legislation import routes

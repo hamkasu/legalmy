@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Subsidiary Legislation - LegalMY{% endblock %}
+
+{% block content %}
+<div class="container legislation-subsidiary" style="padding: 30px 0;">
+    <div style="margin-bottom: 30px;">
+        <a href="/legislation/" style="color: #B8973A; text-decoration: none; font-weight: 500; margin-bottom: 15px; display: inline-block;">← Back to Legislation</a>
+        <h1 style="font-family: 'Merriweather', serif; color: #0D1B2A; margin-bottom: 10px;">📜 Subsidiary Legislation</h1>
+        <p style="color: #64748B; font-size: 1rem;">Gazette Orders and Regulations (PU(A) and PU(B))</p>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% else %}
+
+    <!-- Filter -->
+    <div style="background: white; padding: 20px; border-radius: 4px; margin-bottom: 30px; border-left: 4px solid #B8973A;">
+        <form method="get" class="form-inline" style="gap: 10px;">
+            <label for="pu_type" style="font-weight: 500; color: #0D1B2A; margin-right: 10px;">Filter by Type:</label>
+            <select name="type" id="pu_type" class="form-control" style="min-width: 200px;">
+                <option value="">All Types</option>
+                <option value="PU_A" {% if pu_type == 'PU_A' %}selected{% endif %}>PU(A) - Principal Orders</option>
+                <option value="PU_B" {% if pu_type == 'PU_B' %}selected{% endif %}>PU(B) - Secondary Orders</option>
+            </select>
+            <button type="submit" class="btn btn-primary" style="background-color: #B8973A; border-color: #B8973A;">
+                Filter
+            </button>
+        </form>
+    </div>
+
+    <!-- Results Info -->
+    <div style="margin-bottom: 20px; color: #64748B;">
+        Showing {{ sub_legislations|length }} of {{ total }} subsidiary legislation items
+    </div>
+
+    <!-- Table View -->
+    {% if sub_legislations %}
+    <div style="background: white; border-radius: 4px; overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead style="background: #f3f4f6; border-bottom: 2px solid #e5e7eb;">
+                <tr>
+                    <th style="padding: 15px; text-align: left; color: #0D1B2A; font-weight: bold;">PU Number</th>
+                    <th style="padding: 15px; text-align: left; color: #0D1B2A; font-weight: bold;">Title</th>
+                    <th style="padding: 15px; text-align: left; color: #0D1B2A; font-weight: bold;">Type</th>
+                    <th style="padding: 15px; text-align: left; color: #0D1B2A; font-weight: bold;">Gazetted Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in sub_legislations %}
+                <tr style="border-bottom: 1px solid #e5e7eb; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f9fafb';" onmouseout="this.style.backgroundColor='transparent';">
+                    <td style="padding: 15px;">
+                        <span class="badge" style="background-color: {% if item.type == 'PU_A' %}#0D1B2A{% else %}#4B5563{% endif %}; color: white; font-weight: 600;">
+                            {{ item.pu_number }}
+                        </span>
+                    </td>
+                    <td style="padding: 15px; color: #0D1B2A;">
+                        <a href="/legislation/" style="color: #B8973A; text-decoration: none; font-weight: 500;">
+                            {{ item.title }}
+                        </a>
+                    </td>
+                    <td style="padding: 15px;">
+                        <span style="color: #64748B; font-size: 0.9rem;">
+                            {% if item.type == 'PU_A' %}Principal Order{% else %}Secondary Order{% endif %}
+                        </span>
+                    </td>
+                    <td style="padding: 15px; color: #64748B; font-size: 0.9rem;">
+                        {% if item.gazetted_date %}
+                            {{ item.gazetted_date.strftime('%d %b %Y') if item.gazetted_date.__class__.__name__ == 'datetime' else item.gazetted_date }}
+                        {% else %}
+                            <span style="color: #999;">Unknown</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if pages > 1 %}
+    <nav aria-label="Page navigation" style="margin-top: 30px;">
+        <ul class="pagination justify-content-center">
+            {% for p in range(1, pages + 1) %}
+            <li class="page-item {% if p == page %}active{% endif %}">
+                <a class="page-link" href="?page={{ p }}{% if pu_type %}&type={{ pu_type }}{% endif %}">
+                    {{ p }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div style="background: white; padding: 60px 20px; border-radius: 4px; text-align: center; color: #64748B;">
+        <p style="font-size: 1.2rem; margin-bottom: 10px;">No subsidiary legislation found</p>
+        <p>The subsidiary legislation database will be populated via the ingestion pipeline.</p>
+    </div>
+    {% endif %}
+
+    {% endif %}
+</div>
+{% endblock %}

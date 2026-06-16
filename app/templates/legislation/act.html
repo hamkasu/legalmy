@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}{{ act.title if act else 'Act' }} - LegalMY{% endblock %}
+
+{% block content %}
+<div class="container legislation-act" style="padding: 30px 0;">
+    {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+    <a href="/legislation/" class="btn btn-primary" style="background-color: #B8973A; border-color: #B8973A; margin-top: 10px;">← Back to Legislation</a>
+    {% else %}
+
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #0D1B2A 0%, #1a2f4d 100%); color: white; padding: 40px; border-radius: 4px; margin-bottom: 40px;">
+        <a href="/legislation/" style="color: #B8973A; text-decoration: none; font-weight: 500; margin-bottom: 15px; display: inline-block;">← Back to Legislation</a>
+        <h1 style="font-family: 'Merriweather', serif; margin-bottom: 15px; margin-top: 10px;">{{ act.title }}</h1>
+
+        <div style="display: flex; gap: 15px; margin-top: 20px;">
+            {% if act.year %}
+            <div>
+                <div style="font-size: 0.9rem; opacity: 0.8;">Year</div>
+                <div style="font-weight: bold; font-size: 1.1rem;">{{ act.year }}</div>
+            </div>
+            {% endif %}
+            {% if act.category %}
+            <div>
+                <div style="font-size: 0.9rem; opacity: 0.8;">Category</div>
+                <div style="font-weight: bold; font-size: 1.1rem;">{{ act.category }}</div>
+            </div>
+            {% endif %}
+            <div>
+                <div style="font-size: 0.9rem; opacity: 0.8;">Status</div>
+                <div style="font-weight: bold; font-size: 1.1rem;">
+                    {% if act.repealed_on %}
+                    ❌ Repealed ({{ act.repealed_on.strftime('%Y-%m-%d') }})
+                    {% else %}
+                    ✅ Active
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Section Navigator Sidebar -->
+        <div class="col-md-3" style="margin-bottom: 30px;">
+            <div style="background: white; padding: 20px; border-radius: 4px; position: sticky; top: 20px;">
+                <h5 style="color: #0D1B2A; margin-bottom: 15px; font-weight: bold;">📑 Sections</h5>
+
+                <div style="max-height: 600px; overflow-y: auto;">
+                    {% for section in sections %}
+                    <a href="/legislation/{{ act.id }}/section/{{ section.section_number }}" style="display: block; padding: 8px 12px; color: #64748B; text-decoration: none; font-size: 0.9rem; border-left: 3px solid transparent; margin-bottom: 2px; transition: all 0.2s;" onmouseover="this.style.borderLeftColor='#B8973A'; this.style.backgroundColor='#f3f4f6';" onmouseout="this.style.borderLeftColor='transparent'; this.style.backgroundColor='transparent';">
+                        <strong>{{ section.section_number }}</strong><br/>
+                        <span style="font-size: 0.85rem;">{{ section.heading[:40] }}{% if section.heading|length > 40 %}...{% endif %}</span>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9">
+            {% if act.summary %}
+            <div style="background: #f3f4f6; padding: 20px; border-left: 4px solid #B8973A; border-radius: 4px; margin-bottom: 40px;">
+                <h5 style="color: #0D1B2A; margin-bottom: 10px; font-weight: bold;">Summary</h5>
+                <p style="color: #64748B; margin-bottom: 0;">{{ act.summary }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Sections Display -->
+            <div style="background: white; padding: 30px; border-radius: 4px;">
+                {% if sections %}
+                    {% for section in sections %}
+                    <div style="margin-bottom: 40px; padding-bottom: 30px; border-bottom: 1px solid #e5e7eb;" id="section-{{ section.section_number }}">
+                        <h4 style="color: #0D1B2A; font-weight: bold; margin-bottom: 10px;">
+                            Section {{ section.section_number }}: {{ section.heading }}
+                        </h4>
+                        {% if section.content %}
+                        <p style="color: #64748B; line-height: 1.7; white-space: pre-wrap;">{{ section.content }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <p style="color: #64748B; text-align: center; padding: 40px;">No sections available for this Act</p>
+                {% endif %}
+            </div>
+
+            <!-- Related Judgments -->
+            {% if related_judgments %}
+            <div style="margin-top: 40px;">
+                <h4 style="color: #0D1B2A; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #B8973A; padding-bottom: 10px;">
+                    ⚖️ Cases Citing This Act
+                </h4>
+
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    {% for judgment in related_judgments %}
+                    <div style="background: white; padding: 20px; border-left: 4px solid #B8973A; border-radius: 4px; cursor: pointer; transition: transform 0.2s;" onclick="window.location.href='/judgments/{{ judgment.id }}'">
+                        <h5 style="color: #0D1B2A; margin-bottom: 8px; font-weight: 600;">{{ judgment.title }}</h5>
+                        <div style="color: #64748B; font-size: 0.9rem; margin-bottom: 8px;">
+                            <strong>{{ judgment.citation }}</strong> • {{ judgment.date_decided.strftime('%d %b %Y') if judgment.date_decided else 'Date unknown' }}
+                        </div>
+                        {% if judgment.summary_ai %}
+                        <p style="color: #64748B; font-size: 0.9rem; margin-bottom: 0;">{{ judgment.summary_ai[:150] }}...</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+{% endblock %}
