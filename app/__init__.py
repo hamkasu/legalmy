@@ -164,14 +164,54 @@ def register_error_handlers(app):
 def register_cli_commands(app):
     """Register CLI commands"""
     import click
+    from app.services.ingest_pipeline import IngestPipeline
+    from app.services.anthropic_service import AnthropicService
+    from app.services.scraper import KehakimanScraper, IndustrialCourtScraper
 
     @app.cli.command()
-    @click.option('--source', default='kehakiman', help='Data source')
-    @click.option('--limit', default=10, help='Number of judgments to ingest')
-    def ingest(source, limit):
+    @click.option('--source', default='kehakiman', help='Data source: kehakiman or industrial_court')
+    @click.option('--limit', default=None, type=int, help='Number of judgments to ingest')
+    @click.option('--start-page', default=1, type=int, help='Starting page number')
+    @click.option('--end-page', default=None, type=int, help='Ending page number')
+    def ingest(source, limit, start_page, end_page):
         """Ingest judgments from specified source"""
-        click.echo(f'Ingesting {limit} judgments from {source}...')
-        click.echo('Ingest functionality to be implemented in Prompt 03')
+        with app.app_context():
+            click.echo(f'Starting ingestion from {source}...')
+
+            # Initialize scraper
+            if source == 'kehakiman':
+                scraper = KehakimanScraper()
+            elif source == 'industrial_court':
+                scraper = IndustrialCourtScraper()
+            else:
+                click.echo(f'Error: Unknown source {source}')
+                return
+
+            anthropic_service = AnthropicService()
+            pipeline = IngestPipeline(anthropic_service)
+
+            # Scrape and ingest with progress
+            ingested_count = 0
+            for index, raw_judgment in enumerate(scraper.scrape(start_page, end_page)):
+                if limit and ingested_count >= limit:
+                    click.echo(f'Reached limit of {limit} judgments')
+                    break
+
+                judgment = pipeline.process_judgment(
+                    raw_judgment,
+                    index=ingested_count,
+                    total=limit or '∞'
+                )
+                if judgment:
+                    ingested_count += 1
+
+            # Print final statistics
+            stats = pipeline.get_stats()
+            click.echo(f'\nIngestion complete!')
+            click.echo(f'Total processed: {stats["total"]}')
+            click.echo(f'Ingested: {stats["ingested"]}')
+            click.echo(f'Duplicates: {stats["duplicates"]}')
+            click.echo(f'Errors: {stats["errors"]}')
 
 
 if __name__ == '__main__':
