@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Saved Cases - LegalMY{% endblock %}
+
+{% block content %}
+<div class="container saved-cases-page" style="padding: 40px 0;">
+    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 30px;">
+        <div>
+            <a href="{{ url_for('dashboard.index') }}" style="color: #B8973A; text-decoration: none; font-weight: 500; margin-bottom: 15px; display: inline-block;">← Back to Dashboard</a>
+            <h1 style="font-family: 'Merriweather', serif; color: #0D1B2A; margin-bottom: 10px;">Saved Cases</h1>
+            <p style="color: #64748B;">Your bookmarked judgments for quick reference</p>
+        </div>
+        <button onclick="exportCases()" class="btn btn-primary" style="background-color: #B8973A; border-color: #B8973A; color: #0D1B2A; font-weight: 600; padding: 10px 20px; border-radius: 4px;">
+            📥 Export CSV
+        </button>
+    </div>
+
+    <div style="background: white; padding: 30px; border-radius: 8px; border-left: 4px solid #B8973A;">
+        <!-- Sorting Options -->
+        <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #e5e7eb;">
+            <label style="color: #64748B; font-size: 0.9rem;">Sort by:</label>
+            <select onchange="window.location.href='?sort=' + this.value" style="margin-left: 10px; padding: 6px 12px; border: 1px solid #e5e7eb; border-radius: 4px;">
+                <option value="date" {% if sort == 'date' %}selected{% endif %}>Date (Newest)</option>
+                <option value="citation" {% if sort == 'citation' %}selected{% endif %}>Citation</option>
+                <option value="title" {% if sort == 'title' %}selected{% endif %}>Title</option>
+            </select>
+        </div>
+
+        {% if bookmarked %}
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            {% for judgment in bookmarked %}
+            <div style="background: #f3f4f6; padding: 20px; border-radius: 4px; border-left: 4px solid #B8973A; cursor: pointer; transition: all 0.2s;" onclick="window.location.href='/judgments/{{ judgment.id }}'">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                    <div>
+                        <div style="font-weight: bold; color: #0D1B2A;">{{ judgment.citation }}</div>
+                        <h5 style="color: #0D1B2A; margin: 8px 0; font-weight: 600;">{{ judgment.title }}</h5>
+                    </div>
+                    <button onclick="event.stopPropagation(); unsaveCase({{ judgment.id }})" style="background: #DC2626; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; cursor: pointer;">Unsave</button>
+                </div>
+
+                <div style="color: #64748B; font-size: 0.9rem; margin-bottom: 10px;">
+                    <strong>{{ judgment.court_level.value }}</strong> • {{ judgment.date_decided.strftime('%d %b %Y') if judgment.date_decided else 'Date unknown' }}
+                </div>
+
+                {% if judgment.summary_ai %}
+                <p style="color: #64748B; font-size: 0.9rem; line-height: 1.5; margin-bottom: 0;">{{ judgment.summary_ai[:200] }}...</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if pages > 1 %}
+        <nav style="margin-top: 30px;">
+            <ul class="pagination justify-content-center">
+                {% for p in range(1, pages + 1) %}
+                <li class="page-item {% if p == page %}active{% endif %}">
+                    <a class="page-link" href="?page={{ p }}&sort={{ sort }}">{{ p }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </nav>
+        {% endif %}
+        {% else %}
+        <p style="color: #64748B; text-align: center; padding: 40px 20px;">
+            No saved cases yet. <a href="{{ url_for('search.index') }}" style="color: #B8973A; font-weight: 600;">Start searching</a> and save cases for later.
+        </p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function exportCases() {
+    fetch('/dashboard/saved-cases/export')
+        .then(r => r.json())
+        .then(data => {
+            if(data.status === 'success') {
+                alert('Export started. Check your email shortly.');
+            } else {
+                alert('Error: ' + (data.error || data.message));
+            }
+        });
+}
+
+function unsaveCase(caseId) {
+    if(confirm('Remove this case from saved?')) {
+        // Would implement actual unsave functionality
+        location.reload();
+    }
+}
+</script>
+{% endblock %}

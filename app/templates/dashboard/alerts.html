@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Alerts - LegalMY{% endblock %}
+
+{% block content %}
+<div class="container alerts-page" style="padding: 40px 0;">
+    <div style="margin-bottom: 30px;">
+        <a href="{{ url_for('dashboard.index') }}" style="color: #B8973A; text-decoration: none; font-weight: 500; margin-bottom: 15px; display: inline-block;">← Back to Dashboard</a>
+        <h1 style="font-family: 'Merriweather', serif; color: #0D1B2A; margin-bottom: 10px;">Manage Alerts</h1>
+        <p style="color: #64748B;">Create and manage saved searches to get notified about new judgments</p>
+    </div>
+
+    <div class="row">
+        <!-- Create New Alert Form -->
+        <div class="col-lg-4" style="margin-bottom: 30px;">
+            <div style="background: white; padding: 30px; border-radius: 8px; border-left: 4px solid #B8973A; height: 100%;">
+                <h3 style="color: #0D1B2A; margin-top: 0; margin-bottom: 20px; font-weight: bold;">Create Alert</h3>
+
+                <form id="createAlertForm">
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label style="font-weight: 600; color: #0D1B2A; display: block; margin-bottom: 8px;">Alert Name</label>
+                        <input type="text" id="alertName" name="name" class="form-control" placeholder="e.g. Negligence Cases KL" required style="border-radius: 4px; padding: 8px 12px;">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label style="font-weight: 600; color: #0D1B2A; display: block; margin-bottom: 8px;">Search Query</label>
+                        <input type="text" id="alertQuery" name="query" class="form-control" placeholder="e.g. negligence contract" required style="border-radius: 4px; padding: 8px 12px;">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label style="font-weight: 600; color: #0D1B2A; display: block; margin-bottom: 8px;">Frequency</label>
+                        <select id="alertFrequency" name="frequency" class="form-control" style="border-radius: 4px; padding: 8px 12px;">
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; background-color: #B8973A; border-color: #B8973A; color: #0D1B2A; font-weight: 600; border-radius: 4px; padding: 10px;">
+                        Create Alert
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Alerts List -->
+        <div class="col-lg-8">
+            <div style="background: white; padding: 30px; border-radius: 8px; border-left: 4px solid #B8973A;">
+                <h3 style="color: #0D1B2A; margin-top: 0; margin-bottom: 20px; font-weight: bold;">Your Alerts</h3>
+
+                {% if saved_searches %}
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    {% for search in saved_searches %}
+                    <div style="background: #f3f4f6; padding: 20px; border-radius: 4px; border-left: 4px solid #B8973A;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                            <div>
+                                <h5 style="color: #0D1B2A; margin: 0 0 8px 0; font-weight: 600;">{{ search.name }}</h5>
+                                <p style="color: #64748B; margin: 0; font-size: 0.9rem;">Query: <code>{{ search.query_json.get('query', '') }}</code></p>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                {% if search.alert %}
+                                <button onclick="pauseAlert({{ search.alert.id }})" style="background: #F59E0B; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; cursor: pointer;">
+                                    {% if search.alert.is_active %}Pause{% else %}Resume{% endif %}
+                                </button>
+                                {% endif %}
+                                <button onclick="deleteAlert({{ search.id }})" style="background: #DC2626; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; cursor: pointer;">Delete</button>
+                            </div>
+                        </div>
+
+                        {% if search.alert %}
+                        <div style="color: #64748B; font-size: 0.85rem; margin-top: 10px;">
+                            <strong>{{ search.alert.frequency.upper() }}</strong> •
+                            Last sent: {{ search.alert.last_sent.strftime('%d %b %Y') if search.alert.last_sent else 'Never' }} •
+                            {% if search.alert.is_active %}
+                            <span style="color: #16A34A; font-weight: 600;">✓ Active</span>
+                            {% else %}
+                            <span style="color: #F59E0B; font-weight: 600;">⏸ Paused</span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if pages > 1 %}
+                <nav style="margin-top: 30px;">
+                    <ul class="pagination justify-content-center">
+                        {% for p in range(1, pages + 1) %}
+                        <li class="page-item {% if p == page %}active{% endif %}">
+                            <a class="page-link" href="?page={{ p }}">{{ p }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </nav>
+                {% endif %}
+                {% else %}
+                <p style="color: #64748B; text-align: center; padding: 40px 20px;">
+                    No alerts yet. Create your first alert using the form on the left to get started.
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('createAlertForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const data = {
+        name: document.getElementById('alertName').value,
+        query: document.getElementById('alertQuery').value,
+        frequency: document.getElementById('alertFrequency').value
+    };
+
+    try {
+        const response = await fetch('/dashboard/alerts/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert('Alert created successfully!');
+            location.reload();
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        alert('Failed to create alert: ' + error.message);
+    }
+});
+
+function pauseAlert(alertId) {
+    fetch(`/dashboard/alerts/${alertId}/pause`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(data.status === 'success') {
+            location.reload();
+        }
+    });
+}
+
+function deleteAlert(searchId) {
+    if(confirm('Are you sure? This will delete the saved search and its alert.')) {
+        fetch(`/dashboard/alerts/${searchId}`, { method: 'DELETE' })
+        .then(r => r.json())
+        .then(data => {
+            if(data.status === 'success') {
+                location.reload();
+            }
+        });
+    }
+}
+</script>
+{% endblock %}
