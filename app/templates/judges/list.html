@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Judges - LegalMY{% endblock %}
+
+{% block content %}
+<div class="container judges-list">
+    <h1 style="font-family: 'Merriweather', serif; color: #0D1B2A; margin-bottom: 30px;">Malaysian Judges Directory</h1>
+
+    <!-- Filters -->
+    <div class="row" style="margin-bottom: 30px;">
+        <div class="col-md-12">
+            <form method="get" class="form-inline" style="gap: 10px;">
+                <select name="court_level" class="form-control" style="min-width: 200px;">
+                    <option value="">All Court Levels</option>
+                    {% for level in court_levels %}
+                    <option value="{{ level }}" {% if request.args.get('court_level') == level %}selected{% endif %}>{{ level }}</option>
+                    {% endfor %}
+                </select>
+                <input type="text" name="location" class="form-control" placeholder="Filter by location" style="min-width: 200px;" value="{{ request.args.get('location', '') }}">
+                <button type="submit" class="btn btn-primary" style="background-color: #B8973A; border-color: #B8973A;">
+                    Filter
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results Info -->
+    <div style="margin-bottom: 20px; color: #64748B;">
+        Showing {{ judges|length }} of {{ total }} judges
+    </div>
+
+    <!-- Judges Grid -->
+    <div class="row">
+        {% for item in judges %}
+        <div class="col-md-6" style="margin-bottom: 20px;">
+            <div class="judge-card" style="background: white; padding: 20px; border-left: 4px solid #B8973A; border-radius: 4px; cursor: pointer; transition: transform 0.2s;" onclick="window.location.href='/judges/{{ item.judge.id }}'">
+                <div style="display: flex; gap: 15px;">
+                    <div>
+                        {% if item.judge.photo_url %}
+                            <img src="{{ item.judge.photo_url }}" alt="{{ item.judge.full_name }}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">
+                        {% else %}
+                            <div style="width: 80px; height: 80px; background: #e5e7eb; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <span style="font-size: 40px;">👨‍⚖️</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div style="flex: 1;">
+                        <h5 style="color: #0D1B2A; margin-bottom: 5px;">{{ item.judge.display_name }}</h5>
+                        <div style="color: #64748B; font-size: 0.9rem; margin-bottom: 10px;">
+                            <div>{{ item.judge.court_level.value }}</div>
+                            <div>{{ item.judge.court_location }}</div>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <span class="badge" style="background-color: #0D1B2A; color: white;">
+                                {{ item.total_cases }} cases
+                            </span>
+                            {% if item.analytics and item.analytics.plaintiff_win_rate %}
+                            <span class="badge" style="background-color: #16A34A; color: white;">
+                                {{ "%.0f"|format(item.analytics.plaintiff_win_rate) }}% win rate
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Empty State -->
+    {% if judges|length == 0 %}
+    <div style="text-align: center; padding: 60px 20px; color: #64748B;">
+        <p style="font-size: 1.2rem; margin-bottom: 10px;">No judges found</p>
+        <p>Try adjusting your filters</p>
+    </div>
+    {% endif %}
+
+    <!-- Pagination -->
+    {% if pages > 1 %}
+    <nav aria-label="Page navigation" style="margin-top: 40px;">
+        <ul class="pagination justify-content-center">
+            {% for p in range(1, pages + 1) %}
+            <li class="page-item {% if p == page %}active{% endif %}">
+                <a class="page-link" href="?page={{ p }}{% if request.args.get('court_level') %}&court_level={{ request.args.get('court_level') }}{% endif %}{% if request.args.get('location') %}&location={{ request.args.get('location') }}{% endif %}">
+                    {{ p }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
