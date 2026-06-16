@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% block title %}{{ judge.display_name }} - Judge Profile - LegalMY{% endblock %}
+
+{% block content %}
+<div class="container judge-profile">
+    <!-- Judge Header -->
+    <div class="judge-header" style="background: linear-gradient(135deg, #0D1B2A 0%, #1a2f4d 100%); color: white; padding: 40px; border-radius: 4px; margin-bottom: 40px;">
+        <div class="row align-items-center">
+            <div class="col-md-3 text-center">
+                {% if judge.photo_url %}
+                    <img src="{{ judge.photo_url }}" alt="{{ judge.full_name }}" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover;">
+                {% else %}
+                    <div style="width: 150px; height: 150px; background: #64748B; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
+                        <span style="font-size: 60px;">👨‍⚖️</span>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col-md-9">
+                <h1 style="font-family: 'Merriweather', serif; margin-bottom: 10px;">{{ judge.display_name }}</h1>
+                <div style="font-size: 1.1rem; margin-bottom: 10px;">
+                    <span class="badge" style="background-color: #B8973A; padding: 8px 12px; font-size: 1rem;">{{ judge.court_level.value }}</span>
+                    <span class="badge" style="background-color: transparent; border: 1px solid white; padding: 8px 12px; margin-left: 10px;">{{ judge.court_location }}</span>
+                </div>
+                <div style="opacity: 0.9;">
+                    {% if judge.date_appointed %}
+                        <p><strong>Appointed:</strong> {{ judge.date_appointed.strftime('%B %Y') }}</p>
+                    {% endif %}
+                    {% if judge.date_retired %}
+                        <p style="color: #F59E0B;"><strong>Retired:</strong> {{ judge.date_retired.strftime('%B %Y') }}</p>
+                    {% else %}
+                        <p style="color: #16A34A;"><strong>Status:</strong> Active</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats KPI Row -->
+    {% if analytics %}
+    <div class="row stats-row" style="margin-bottom: 40px;">
+        <div class="col-md-3">
+            <div class="stat-card" style="background: white; padding: 20px; border-left: 4px solid #B8973A; border-radius: 4px; text-align: center;">
+                <div style="font-size: 2.5rem; color: #0D1B2A; font-weight: bold;">{{ analytics.total_cases }}</div>
+                <div style="color: #64748B; margin-top: 10px;">Total Cases</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: white; padding: 20px; border-left: 4px solid #16A34A; border-radius: 4px; text-align: center;">
+                <div style="font-size: 2.5rem; color: #16A34A; font-weight: bold;">
+                    {% if analytics.plaintiff_win_rate %}{{ "%.1f"|format(analytics.plaintiff_win_rate) }}%{% else %}N/A{% endif %}
+                </div>
+                <div style="color: #64748B; margin-top: 10px;">Plaintiff Win Rate</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: white; padding: 20px; border-left: 4px solid #DC2626; border-radius: 4px; text-align: center;">
+                <div style="font-size: 2.5rem; color: #DC2626; font-weight: bold;">
+                    {% if analytics.defendant_win_rate %}{{ "%.1f"|format(analytics.defendant_win_rate) }}%{% else %}N/A{% endif %}
+                </div>
+                <div style="color: #64748B; margin-top: 10px;">Defendant Win Rate</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: white; padding: 20px; border-left: 4px solid #B8973A; border-radius: 4px; text-align: center;">
+                <div style="font-size: 2.5rem; color: #0D1B2A; font-weight: bold;">
+                    {% if analytics.avg_days_to_judgment %}{{ "%.0f"|format(analytics.avg_days_to_judgment) }}{% else %}N/A{% endif %}
+                </div>
+                <div style="color: #64748B; margin-top: 10px;">Avg Days to Judgment</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Insight Panel (Subscriber Only) -->
+    {% if insight %}
+    <div style="background: linear-gradient(135deg, #0D1B2A 0%, #1a2f4d 100%); color: white; padding: 30px; border-radius: 4px; margin-bottom: 40px;">
+        <h4 style="color: #B8973A; margin-bottom: 15px;">💡 Judicial Insight</h4>
+        <p style="line-height: 1.8;">{{ insight }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Charts Row -->
+    <div class="row" style="margin-bottom: 40px;">
+        <div class="col-md-6">
+            <div style="background: white; padding: 20px; border-radius: 4px;">
+                <h5 style="color: #0D1B2A; font-weight: bold; border-bottom: 2px solid #B8973A; padding-bottom: 10px; margin-bottom: 20px;">Cases Over Time</h5>
+                <canvas id="cases-by-year-chart" height="100"></canvas>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div style="background: white; padding: 20px; border-radius: 4px;">
+                <h5 style="color: #0D1B2A; font-weight: bold; border-bottom: 2px solid #B8973A; padding-bottom: 10px; margin-bottom: 20px;">Outcome Distribution</h5>
+                <canvas id="outcome-chart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subject Matter Breakdown -->
+    <div style="background: white; padding: 20px; border-radius: 4px; margin-bottom: 40px;">
+        <h5 style="color: #0D1B2A; font-weight: bold; border-bottom: 2px solid #B8973A; padding-bottom: 10px; margin-bottom: 20px;">Subject Matter Breakdown</h5>
+        <canvas id="subject-chart" height="50"></canvas>
+    </div>
+
+    <!-- Top Statutes Cited -->
+    {% if analytics.most_cited_statutes %}
+    <div style="background: white; padding: 20px; border-radius: 4px; margin-bottom: 40px;">
+        <h5 style="color: #0D1B2A; font-weight: bold; border-bottom: 2px solid #B8973A; padding-bottom: 10px; margin-bottom: 20px;">Most Cited Statutes</h5>
+        <div class="statutes-list">
+            {% for statute in analytics.most_cited_statutes[:10] %}
+            <div style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between;">
+                <span style="color: #0D1B2A;">{{ statute.statute }}</span>
+                <span class="badge" style="background-color: #B8973A;">{{ statute.count }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Landmark Judgments -->
+    {% if analytics.landmark_judgments %}
+    <div style="margin-bottom: 40px;">
+        <h4 style="color: #0D1B2A; font-weight: bold; border-bottom: 2px solid #B8973A; padding-bottom: 10px; margin-bottom: 20px;">Landmark Judgments (Cited 10+ times)</h4>
+        <div class="landmark-list">
+            {% for judgment in analytics.landmark_judgments[:5] %}
+            <div style="background: linear-gradient(135deg, #0D1B2A 0%, #1a2f4d 100%); color: white; padding: 20px; margin-bottom: 15px; border-radius: 4px;">
+                <div style="font-family: 'Merriweather', serif; font-size: 1.1rem; margin-bottom: 10px;">{{ judgment.citation }}</div>
+                <div style="margin-bottom: 10px;">{{ judgment.title }}</div>
+                <div style="display: flex; justify-content: space-between; opacity: 0.8;">
+                    <span>{{ judgment.date_decided }}</span>
+                    <span class="badge" style="background-color: #B8973A;">Cited {{ judgment.citation_count }} times</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Recent Judgments -->
+    {% if recent_judgments %}
+    <div style="background: white; padding: 20px; border-radius: 4px; margin-bottom: 40px;">
+        <h5 style="color: #0D1B2A; font-weight: bold; border-bottom: 2px solid #B8973A; padding-bottom: 10px; margin-bottom: 20px;">Recent Judgments</h5>
+        <div class="table-responsive">
+            <table class="table">
+                <thead style="background-color: #f3f4f6;">
+                    <tr>
+                        <th>Citation</th>
+                        <th>Title</th>
+                        <th>Date</th>
+                        <th>Outcome</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for judgment in recent_judgments %}
+                    <tr>
+                        <td><strong>{{ judgment.citation }}</strong></td>
+                        <td>{{ judgment.title[:50] }}...</td>
+                        <td>{{ judgment.date_decided.strftime('%d %b %Y') if judgment.date_decided else 'N/A' }}</td>
+                        <td>
+                            {% if judgment.outcome %}
+                                <span class="badge" style="background-color:
+                                    {% if judgment.outcome.value == 'allowed' %}#16A34A{% elif judgment.outcome.value == 'dismissed' %}#DC2626{% else %}#F59E0B{% endif %}">
+                                    {{ judgment.outcome.value }}
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+    // Fetch analytics via API and render charts
+    fetch('/judges/api/{{ judge.id }}/analytics')
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const a = data;
+
+                // Cases by year
+                if (Object.keys(a.cases_by_year).length > 0) {
+                    const years = Object.keys(a.cases_by_year).sort();
+                    const counts = years.map(y => a.cases_by_year[y]);
+                    new Chart(document.getElementById('cases-by-year-chart'), {
+                        type: 'line',
+                        data: {
+                            labels: years,
+                            datasets: [{
+                                label: 'Cases',
+                                data: counts,
+                                borderColor: '#B8973A',
+                                backgroundColor: 'rgba(184, 151, 58, 0.1)',
+                                tension: 0.4,
+                                fill: true,
+                            }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                    });
+                }
+
+                // Outcome chart
+                if (a.subject_matter_breakdown && Object.keys(a.subject_matter_breakdown).length > 0) {
+                    const subjects = Object.keys(a.subject_matter_breakdown);
+                    const counts = subjects.map(s => a.subject_matter_breakdown[s]);
+                    new Chart(document.getElementById('subject-chart'), {
+                        type: 'bar',
+                        data: {
+                            labels: subjects,
+                            datasets: [{
+                                label: 'Cases',
+                                data: counts,
+                                backgroundColor: '#B8973A',
+                            }]
+                        },
+                        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                    });
+                }
+
+                // Outcome pie
+                const outcomeLabels = ['Allowed', 'Dismissed', 'Partly Allowed', 'Struck Out'];
+                const outcomeData = [
+                    a.plaintiff_win_rate || 0,
+                    a.defendant_win_rate || 0,
+                    0, 0
+                ];
+                new Chart(document.getElementById('outcome-chart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: outcomeLabels,
+                        datasets: [{
+                            data: outcomeData,
+                            backgroundColor: ['#16A34A', '#DC2626', '#F59E0B', '#6B7280'],
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                });
+            }
+        })
+        .catch(e => console.error('Error loading analytics:', e));
+</script>
+{% endblock %}
