@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}{% if section %}Section {{ section.section_number }}{% endif %} - LegalMY{% endblock %}
+
+{% block content %}
+<div class="container legislation-section" style="padding: 30px 0;">
+    {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+    <a href="/legislation/" class="btn btn-primary" style="background-color: #B8973A; border-color: #B8973A; margin-top: 10px;">← Back to Legislation</a>
+    {% else %}
+
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #0D1B2A 0%, #1a2f4d 100%); color: white; padding: 40px; border-radius: 4px; margin-bottom: 40px;">
+        <a href="/legislation/{{ act.id }}" style="color: #B8973A; text-decoration: none; font-weight: 500; margin-bottom: 15px; display: inline-block;">← Back to {{ act.title }}</a>
+
+        <h1 style="font-family: 'Merriweather', serif; margin-bottom: 10px; margin-top: 10px;">
+            Section {{ section.section_number }}: {{ section.heading }}
+        </h1>
+        <p style="opacity: 0.9; font-size: 1.05rem;">{{ act.title }}</p>
+    </div>
+
+    <div class="row">
+        <!-- Section Navigator Sidebar -->
+        <div class="col-md-3" style="margin-bottom: 30px;">
+            <div style="background: white; padding: 20px; border-radius: 4px; position: sticky; top: 20px;">
+                <h5 style="color: #0D1B2A; margin-bottom: 15px; font-weight: bold;">📑 Sections</h5>
+
+                <div style="max-height: 600px; overflow-y: auto;">
+                    {% for sec in sections %}
+                    <a href="/legislation/{{ act.id }}/section/{{ sec.section_number }}" style="display: block; padding: 8px 12px; color: {% if sec.id == section.id %}#B8973A{% else %}#64748B{% endif %}; text-decoration: none; font-size: 0.9rem; border-left: 3px solid {% if sec.id == section.id %}#B8973A{% else %}transparent{% endif %}; background-color: {% if sec.id == section.id %}#f3f4f6{% else %}transparent{% endif %}; margin-bottom: 2px; transition: all 0.2s;" onmouseover="{% if sec.id != section.id %}this.style.borderLeftColor='#B8973A'; this.style.backgroundColor='#f3f4f6';{% endif %}" onmouseout="{% if sec.id != section.id %}this.style.borderLeftColor='transparent'; this.style.backgroundColor='transparent';{% endif %}">
+                        <strong>{{ sec.section_number }}</strong><br/>
+                        <span style="font-size: 0.85rem;">{{ sec.heading[:40] }}{% if sec.heading|length > 40 %}...{% endif %}</span>
+                    </a>
+                    {% endfor %}
+                </div>
+
+                <hr style="margin: 20px 0;">
+                <a href="/legislation/{{ act.id }}" class="btn btn-primary" style="width: 100%; background-color: #B8973A; border-color: #B8973A; color: #0D1B2A; font-size: 0.9rem; text-decoration: none; display: block; padding: 8px;">
+                    View All Sections
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <!-- Section Content -->
+            <div style="background: white; padding: 30px; border-radius: 4px; margin-bottom: 30px;">
+                {% if section.content %}
+                <div style="color: #64748B; line-height: 1.8; white-space: pre-wrap; font-family: 'Courier New', monospace; border-left: 4px solid #B8973A; padding-left: 20px;">
+                    {{ section.content }}
+                </div>
+                {% else %}
+                <p style="color: #64748B; text-align: center; padding: 40px;">No content available for this section</p>
+                {% endif %}
+            </div>
+
+            <!-- Related Judgments -->
+            {% if related_judgments %}
+            <div style="background: white; padding: 30px; border-radius: 4px;">
+                <h4 style="color: #0D1B2A; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #B8973A; padding-bottom: 10px;">
+                    ⚖️ Cases Citing This Section
+                </h4>
+
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    {% for judgment in related_judgments %}
+                    <div style="background: #f3f4f6; padding: 20px; border-left: 4px solid #B8973A; border-radius: 4px; cursor: pointer; transition: transform 0.2s;" onclick="window.location.href='/judgments/{{ judgment.id }}'">
+                        <h5 style="color: #0D1B2A; margin-bottom: 8px; font-weight: 600;">{{ judgment.title }}</h5>
+                        <div style="color: #64748B; font-size: 0.9rem; margin-bottom: 8px;">
+                            <strong>{{ judgment.citation }}</strong> • {{ judgment.date_decided.strftime('%d %b %Y') if judgment.date_decided else 'Date unknown' }}
+                        </div>
+                        {% if judgment.summary_ai %}
+                        <p style="color: #64748B; font-size: 0.9rem; margin-bottom: 0;">{{ judgment.summary_ai[:150] }}...</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div style="background: #f3f4f6; padding: 30px; border-radius: 4px; text-align: center;">
+                <p style="color: #64748B;">No cases citing this section yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+{% endblock %}
