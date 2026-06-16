@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Argument Generator - LegalMY AI Tools{% endblock %}
+{% block content %}
+<div class="container ai-tool">
+    <h1 style="font-family: 'Merriweather', serif; color: #0D1B2A; margin-bottom: 30px;">💡 Legal Argument Generator</h1>
+    <div class="row">
+        <div class="col-md-8">
+            <div style="background: white; padding: 30px; border-radius: 4px; border-left: 4px solid #B8973A;">
+                <p style="color: #64748B; margin-bottom: 20px;">Describe case facts. Get primary arguments backed by Malaysian case law.</p>
+                <form id="argument-form">
+                    <textarea class="form-control" name="case_facts" rows="8" placeholder="Describe your case facts..." style="margin-bottom: 15px;"></textarea>
+                    <select class="form-control" name="user_role" style="margin-bottom: 15px;">
+                        <option value="plaintiff">Plaintiff</option>
+                        <option value="defendant">Defendant</option>
+                        <option value="appellant">Appellant</option>
+                        <option value="respondent">Respondent</option>
+                    </select>
+                    <select class="form-control" name="subject_matter" style="margin-bottom: 15px;">
+                        <option value="Contract">Contract</option>
+                        <option value="Tort">Tort</option>
+                        <option value="Criminal">Criminal</option>
+                        <option value="Employment">Employment</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary" style="background-color: #B8973A; border-color: #B8973A; color: #0D1B2A; font-weight: 600;">Generate Arguments</button>
+                </form>
+                <div id="results" style="margin-top: 40px; display: none;"></div>
+            </div>
+        </div>
+        <div class="col-md-4" style="background: #f3f4f6; padding: 20px; border-radius: 4px;">
+            <h5 style="color: #0D1B2A; margin-bottom: 15px;">Output Includes</h5>
+            <ul style="color: #64748B;">
+                <li>3-5 primary arguments</li>
+                <li>Legal basis & statutes</li>
+                <li>Supporting case law</li>
+                <li>Counter-arguments</li>
+                <li>Affidavit structure</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

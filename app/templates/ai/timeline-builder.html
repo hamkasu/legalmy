@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Timeline Builder - LegalMY AI Tools{% endblock %}
+{% block content %}
+<div class="container ai-tool">
+    <h1 style="font-family: 'Merriweather', serif; color: #0D1B2A; margin-bottom: 30px;">📅 Case Timeline Builder</h1>
+    <div class="row">
+        <div class="col-md-8">
+            <div style="background: white; padding: 30px; border-radius: 4px; border-left: 4px solid #B8973A;">
+                <p style="color: #64748B; margin-bottom: 20px;">Paste case documents. Extract all dates and create an interactive timeline.</p>
+                <form id="timeline-form">
+                    <div id="documents-list"></div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="addDocument()" style="margin-bottom: 15px;">+ Add Document</button>
+                    <br/>
+                    <button type="submit" class="btn btn-primary" style="background-color: #B8973A; border-color: #B8973A; color: #0D1B2A; font-weight: 600;">Build Timeline</button>
+                </form>
+                <div id="results" style="margin-top: 40px; display: none;"></div>
+            </div>
+        </div>
+        <div class="col-md-4" style="background: #f3f4f6; padding: 20px; border-radius: 4px;">
+            <h5 style="color: #0D1B2A; margin-bottom: 15px;">Features</h5>
+            <ul style="color: #64748B;">
+                <li>Automatic date extraction</li>
+                <li>Event categorization</li>
+                <li>Interactive timeline</li>
+                <li>Color-coded events</li>
+                <li>PDF export</li>
+            </ul>
+        </div>
+    </div>
+</div>
+<script>
+    function addDocument() {
+        const list = document.getElementById('documents-list');
+        const count = list.children.length;
+        list.innerHTML += `<textarea class="form-control" name="documents[]" rows="5" placeholder="Paste document ${count + 1}..." style="margin-bottom: 10px;"></textarea>`;
+    }
+    addDocument();
+</script>
+{% endblock %}

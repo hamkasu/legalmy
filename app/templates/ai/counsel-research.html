@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Counsel Research - LegalMY AI Tools{% endblock %}
+{% block content %}
+<div class="container ai-tool">
+    <h1 style="font-family: 'Merriweather', serif; color: #0D1B2A; margin-bottom: 30px;">🔍 Opposing Counsel Research</h1>
+    <div class="row">
+        <div class="col-md-8">
+            <div style="background: white; padding: 30px; border-radius: 4px; border-left: 4px solid #B8973A;">
+                <p style="color: #64748B; margin-bottom: 20px;">Enter opposing counsel's name. Get strategic intelligence from their litigation record.</p>
+                <form id="counsel-form">
+                    <input type="text" class="form-control" name="counsel_name" placeholder="Counsel name or bar council number" style="margin-bottom: 15px;">
+                    <button type="submit" class="btn btn-primary" style="background-color: #B8973A; border-color: #B8973A; color: #0D1B2A; font-weight: 600;">Research Counsel</button>
+                </form>
+                <div id="results" style="margin-top: 40px; display: none;"></div>
+            </div>
+        </div>
+        <div class="col-md-4" style="background: #f3f4f6; padding: 20px; border-radius: 4px;">
+            <h5 style="color: #0D1B2A; margin-bottom: 15px;">Analysis Includes</h5>
+            <ul style="color: #64748B;">
+                <li>Win/loss record</li>
+                <li>Common arguments</li>
+                <li>Court expertise</li>
+                <li>Strategic weaknesses</li>
+                <li>Recommended tactics</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
