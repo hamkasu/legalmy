@@ -196,6 +196,38 @@ def register_cli_commands(app):
     from app.services.ingest_pipeline import IngestPipeline
     from app.services.anthropic_service import AnthropicService
     from app.services.scraper import KehakimanScraper, IndustrialCourtScraper
+    from app.models.user import User, UserRole
+
+    @app.cli.command()
+    @click.option('--email', required=True, help='Email address')
+    @click.option('--password', required=True, help='Password')
+    @click.option('--full-name', default='Administrator', help='Full name')
+    def create_admin(email, password, full_name):
+        """Create a superadmin user"""
+        with app.app_context():
+            # Check if user already exists
+            existing_user = User.query.filter_by(email=email).first()
+            if existing_user:
+                click.echo(f'Error: User with email {email} already exists')
+                return
+
+            # Create new admin user
+            user = User(
+                email=email,
+                full_name=full_name,
+                role=UserRole.ADMIN,
+                is_active=True,
+                is_verified=True
+            )
+            user.set_password(password)
+
+            db.session.add(user)
+            db.session.commit()
+
+            click.echo(f'✓ Admin user created successfully!')
+            click.echo(f'  Email: {email}')
+            click.echo(f'  Name: {full_name}')
+            click.echo(f'  Role: ADMIN')
 
     @app.cli.command()
     @click.option('--source', default='kehakiman', help='Data source: kehakiman or industrial_court')
