@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}Ingestion Control - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <h1>Ingestion Control</h1>
+
+    <!-- Ingest Form -->
+    <div class="ingest-card">
+        <h2>Trigger Ingestion</h2>
+        <form id="ingestForm">
+            <div class="form-group">
+                <label>Data Source</label>
+                <select name="source" id="sourceSelect" class="form-control" required>
+                    <option value="">Select a source...</option>
+                    {% for source in sources %}
+                    <option value="{{ source }}">{{ source|replace('_', ' ')|title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Limit (number of items)</label>
+                <input type="number" name="limit" class="form-control" value="100" min="1">
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="dry_run" id="dryRun">
+                    Dry run (don't save to database)
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Start Ingestion</button>
+        </form>
+    </div>
+
+    <!-- Progress Log -->
+    <div class="log-card">
+        <h2>Ingestion Progress</h2>
+        <div id="progressLog" class="progress-log">
+            <p class="text-muted">Waiting for ingestion to start...</p>
+        </div>
+    </div>
+
+    <!-- Failed Tasks -->
+    <div class="failed-card">
+        <h2>Failed Tasks</h2>
+        <p class="text-muted">Failed ingestion tasks will appear here</p>
+    </div>
+</div>
+
+<style>
+    .admin-container {
+        padding: 2rem;
+        background: #f8f9fa;
+        min-height: 100vh;
+    }
+
+    .admin-container h1 {
+        color: #0F1B2D;
+        margin-bottom: 2rem;
+    }
+
+    .ingest-card, .log-card, .failed-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .ingest-card h2, .log-card h2, .failed-card h2 {
+        color: #0F1B2D;
+        margin-bottom: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #0F1B2D;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .btn-primary {
+        background: #C9A84C;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #B8973A;
+    }
+
+    .progress-log {
+        background: #1e293b;
+        color: #e2e8f0;
+        padding: 1rem;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 0.85rem;
+        max-height: 400px;
+        overflow-y: auto;
+        line-height: 1.5;
+    }
+
+    .log-entry {
+        margin-bottom: 0.5rem;
+    }
+
+    .log-success {
+        color: #16A34A;
+    }
+
+    .log-error {
+        color: #DC2626;
+    }
+
+    .log-info {
+        color: #3B82F6;
+    }
+
+    .text-muted {
+        color: #64748B;
+    }
+</style>
+
+<script>
+document.getElementById('ingestForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const source = document.getElementById('sourceSelect').value;
+    const limit = document.querySelector('input[name="limit"]').value;
+    const dryRun = document.getElementById('dryRun').checked;
+
+    const logDiv = document.getElementById('progressLog');
+    logDiv.innerHTML = '<p class="log-entry log-info">Starting ingestion...</p>';
+
+    try {
+        const response = await fetch('{{ url_for("admin.trigger_ingest") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                source: source,
+                limit: parseInt(limit),
+                dry_run: dryRun
+            })
+        });
+
+        const data = await response.json();
+        if (data.status === 'ok') {
+            const taskId = data.task_id;
+            logDiv.innerHTML += `<p class="log-entry log-success">Task queued: ${taskId}</p>`;
+            
+            // Poll for updates (in real implementation, use WebSocket or SSE)
+            logDiv.innerHTML += '<p class="log-entry log-info">Processing... (check Celery logs for details)</p>';
+        }
+    } catch (error) {
+        logDiv.innerHTML += `<p class="log-entry log-error">Error: ${error.message}</p>`;
+    }
+});
+</script>
+{% endblock %}

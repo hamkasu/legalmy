@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}System Health - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <h1>System Health Check</h1>
+
+    <!-- Status Grid -->
+    <div class="status-grid">
+        <div class="status-card {{ 'ok' if health_status.db == 'ok' else 'error' }}">
+            <h3>Database</h3>
+            <div class="status-icon">{{ '✓' if health_status.db == 'ok' else '✗' }}</div>
+            <p>{{ health_status.db }}</p>
+        </div>
+
+        <div class="status-card {{ 'ok' if health_status.redis == 'ok' else 'error' }}">
+            <h3>Redis</h3>
+            <div class="status-icon">{{ '✓' if health_status.redis == 'ok' else '✗' }}</div>
+            <p>{{ health_status.redis }}</p>
+        </div>
+
+        <div class="status-card {{ 'ok' if 'tasks active' in health_status.celery or health_status.celery == 'ok' else 'warning' }}">
+            <h3>Celery Workers</h3>
+            <div class="status-icon">{{ '✓' if 'error' not in health_status.celery else '✗' }}</div>
+            <p>{{ health_status.celery }}</p>
+        </div>
+
+        <div class="status-card">
+            <h3>Disk Usage</h3>
+            <div class="status-icon">💾</div>
+            <p>{{ health_status.disk_usage }}</p>
+        </div>
+    </div>
+
+    <!-- API Keys -->
+    <div class="info-card">
+        <h2>API Keys</h2>
+        <p>Active API keys: <strong>{{ active_api_keys }}</strong></p>
+    </div>
+
+    <!-- Environment Info -->
+    <div class="info-card">
+        <h2>Deployment Environment</h2>
+        <table class="info-table">
+            <tr>
+                <td>Environment</td>
+                <td><code>{{ env_info.FLASK_ENV }}</code></td>
+            </tr>
+            <tr>
+                <td>Railway Environment</td>
+                <td><code>{{ env_info.RAILWAY_ENV }}</code></td>
+            </tr>
+            <tr>
+                <td>Database</td>
+                <td>{{ env_info.DATABASE_URL }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Help -->
+    <div class="help-card">
+        <h2>Troubleshooting</h2>
+        <ul>
+            <li><strong>Database error:</strong> Check Railway PostgreSQL plugin is running</li>
+            <li><strong>Redis error:</strong> Check Railway Redis plugin is running</li>
+            <li><strong>Celery error:</strong> Verify worker service is running: <code>celery -A celery_worker worker</code></li>
+            <li><strong>Disk usage high:</strong> Clean old raw HTML files from /data/raw/</li>
+        </ul>
+    </div>
+</div>
+
+<style>
+    .admin-container {
+        padding: 2rem;
+        background: #f8f9fa;
+        min-height: 100vh;
+    }
+
+    .admin-container h1 {
+        color: #0F1B2D;
+        margin-bottom: 2rem;
+    }
+
+    .status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .status-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border-left: 4px solid #C9A84C;
+        text-align: center;
+    }
+
+    .status-card.ok {
+        border-left-color: #16A34A;
+    }
+
+    .status-card.error {
+        border-left-color: #DC2626;
+    }
+
+    .status-card.warning {
+        border-left-color: #FBBF24;
+    }
+
+    .status-card h3 {
+        color: #0F1B2D;
+        margin-bottom: 1rem;
+    }
+
+    .status-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .status-card p {
+        color: #64748B;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .info-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .info-card h2 {
+        color: #0F1B2D;
+        margin-bottom: 1rem;
+    }
+
+    .info-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .info-table tr {
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .info-table td {
+        padding: 0.75rem;
+    }
+
+    .info-table td:first-child {
+        font-weight: 500;
+        color: #0F1B2D;
+        width: 30%;
+    }
+
+    code {
+        background: #f1f5f9;
+        padding: 0.2rem 0.4rem;
+        border-radius: 3px;
+        font-family: monospace;
+        font-size: 0.9rem;
+    }
+
+    .help-card {
+        background: #EFF6FF;
+        border-left: 4px solid #3B82F6;
+        padding: 1.5rem;
+        border-radius: 8px;
+    }
+
+    .help-card h2 {
+        color: #1E40AF;
+        margin-bottom: 1rem;
+    }
+
+    .help-card ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .help-card li {
+        padding: 0.5rem 0;
+        color: #1E40AF;
+    }
+
+    .help-card strong {
+        font-weight: 600;
+    }
+</style>
+{% endblock %}

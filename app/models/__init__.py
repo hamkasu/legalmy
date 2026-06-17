@@ -5,6 +5,7 @@ from app.models.judge import Judge, JudgeAnalytics
 from app.models.lawyer import Lawyer, LawFirm, LawyerAnalytics, HeadcountTier
 from app.models.case import Case, Party, CaseDocument, CaseStatus, PartyRole, DocumentType
 from app.models.alert import SavedSearch, Alert, AlertFrequency
+from app.models.analytics import AIUsage
 
 __all__ = [
     'User', 'Subscription', 'ApiKey', 'UserRole', 'SubscriptionStatus',
@@ -14,4 +15,5 @@ __all__ = [
     'Lawyer', 'LawFirm', 'LawyerAnalytics', 'HeadcountTier',
     'Case', 'Party', 'CaseDocument', 'CaseStatus', 'PartyRole', 'DocumentType',
     'SavedSearch', 'Alert', 'AlertFrequency',
+    'AIUsage',
 ]
