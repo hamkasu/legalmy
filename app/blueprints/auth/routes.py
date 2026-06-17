@@ -330,7 +330,7 @@ def change_password():
         new_password = request.form.get('new_password', '')
         confirm_password = request.form.get('confirm_password', '')
 
-        if not check_password_hash(current_user.password_hash, current_password):
+        if not current_user.check_password(current_password):
             flash('Current password is incorrect', 'danger')
             return redirect(url_for('auth.profile'))
 
