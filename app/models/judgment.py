@@ -17,19 +17,19 @@ class CourtLevel(Enum):
 
 
 class OutcomeType(Enum):
-    ALLOWED = 'ALLOWED'
-    DISMISSED = 'DISMISSED'
-    PARTLY_ALLOWED = 'PARTLY_ALLOWED'
-    STRUCK_OUT = 'STRUCK_OUT'
+    ALLOWED = 'allowed'
+    DISMISSED = 'dismissed'
+    PARTLY_ALLOWED = 'partly_allowed'
+    STRUCK_OUT = 'struck_out'
 
 
 class CitationRelationship(Enum):
-    FOLLOWED = 'FOLLOWED'
-    DISTINGUISHED = 'DISTINGUISHED'
-    OVERRULED = 'OVERRULED'
-    CONSIDERED = 'CONSIDERED'
-    REFERRED = 'REFERRED'
-    APPROVED = 'APPROVED'
+    FOLLOWED = 'followed'
+    DISTINGUISHED = 'distinguished'
+    OVERRULED = 'overruled'
+    CONSIDERED = 'considered'
+    REFERRED = 'referred'
+    APPROVED = 'approved'
 
 
 class Judgment(db.Model):

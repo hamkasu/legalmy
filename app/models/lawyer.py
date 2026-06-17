@@ -4,10 +4,10 @@ from app.extensions import db
 
 
 class HeadcountTier(Enum):
-    SOLO = 'SOLO'
-    SMALL = 'SMALL'
-    MEDIUM = 'MEDIUM'
-    LARGE = 'LARGE'
+    SOLO = 'solo'
+    SMALL = 'small'
+    MEDIUM = 'medium'
+    LARGE = 'large'
 
 
 class LawFirm(db.Model):
