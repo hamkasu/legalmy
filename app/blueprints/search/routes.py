@@ -1,11 +1,11 @@
 from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for
 from flask_login import login_required, current_user
-from app.blueprints.search import search_bp
 from app.services.search_service import SearchService
 from app.models.judgment import CourtLevel, OutcomeType
 from app.models.alert import SavedSearch
 from app.extensions import db
 
+bp = Blueprint('search', __name__, template_folder='templates')
 search_service = SearchService()
 
 # Malaysian states for location filter
@@ -16,7 +16,7 @@ MALAYSIAN_STATES = [
 ]
 
 
-@search_bp.route('/', methods=['GET', 'POST'])
+@bp.route('/', methods=['GET', 'POST'])
 def index():
     """Search UI homepage."""
     return render_template(
@@ -27,7 +27,7 @@ def index():
     )
 
 
-@search_bp.route('/api/judgments', methods=['POST'])
+@bp.route('/api/judgments', methods=['POST'])
 @login_required
 def api_search_judgments():
     """
@@ -113,7 +113,7 @@ def api_search_judgments():
     })
 
 
-@search_bp.route('/api/legislation', methods=['POST'])
+@bp.route('/api/legislation', methods=['POST'])
 @login_required
 def api_search_legislation():
     """Search legislation API endpoint."""
@@ -158,7 +158,7 @@ def api_search_legislation():
     })
 
 
-@search_bp.route('/api/judges', methods=['POST'])
+@bp.route('/api/judges', methods=['POST'])
 @login_required
 def api_search_judges():
     """Search judges API endpoint."""
@@ -195,7 +195,7 @@ def api_search_judges():
     })
 
 
-@search_bp.route('/api/lawyers', methods=['POST'])
+@bp.route('/api/lawyers', methods=['POST'])
 @login_required
 def api_search_lawyers():
     """Search lawyers API endpoint."""
@@ -232,7 +232,7 @@ def api_search_lawyers():
     })
 
 
-@search_bp.route('/api/save-search', methods=['POST'])
+@bp.route('/api/save-search', methods=['POST'])
 @login_required
 def api_save_search():
     """Save a search for later alerts."""
