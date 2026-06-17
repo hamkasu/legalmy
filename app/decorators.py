@@ -53,3 +53,32 @@ def request_wants_json():
     return request.path.startswith('/api/') or \
            request.accept_mimetypes.get('application/json', 0) > \
            request.accept_mimetypes.get('text/html', 0)
+
+
+def role_required(required_role):
+    """
+    Decorator to require a specific user role.
+    Usage: @role_required('admin')
+    """
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not current_user.is_authenticated:
+                flash('Please log in to access this page.', 'warning')
+                return redirect(url_for('auth.login', next=request.url))
+
+            from app.models.user import UserRole
+            if hasattr(UserRole, required_role.upper()):
+                required = getattr(UserRole, required_role.upper())
+            else:
+                required = required_role
+
+            if current_user.role != required:
+                flash(f'You do not have permission to access this page.', 'danger')
+                return redirect(url_for('landing.index'))
+
+            return f(*args, **kwargs)
+
+        return decorated_function
+
+    return decorator
