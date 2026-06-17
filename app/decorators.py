@@ -2,6 +2,7 @@ from functools import wraps
 from flask import jsonify, redirect, url_for, flash, request
 from flask_login import current_user
 from app.config import PLANS
+from app.services.usage_service import UsageService
 
 
 def require_plan(min_plan):
@@ -76,6 +77,33 @@ def role_required(required_role):
             if current_user.role != required:
                 flash(f'You do not have permission to access this page.', 'danger')
                 return redirect(url_for('landing.index'))
+
+            return f(*args, **kwargs)
+
+        return decorated_function
+
+    return decorator
+
+
+def require_ai_quota():
+    """
+    Decorator to enforce AI query quota before tool usage.
+    Returns 402 JSON if quota exceeded.
+    Usage: @require_ai_quota()
+    """
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not current_user.is_authenticated:
+                return jsonify({'error': 'Authentication required'}), 401
+
+            allowed, reason = UsageService.can_use_ai_tool(current_user)
+            if not allowed:
+                return jsonify({
+                    'error': 'Quota exceeded or plan does not include AI tools',
+                    'message': reason,
+                    'upgrade_url': url_for('pricing.index', _external=True)
+                }), 402
 
             return f(*args, **kwargs)
 

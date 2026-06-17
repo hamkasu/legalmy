@@ -81,6 +81,64 @@
     </div>
 </div>
 
+{% if current_user.is_authenticated %}
+<!-- Usage Banner for Logged-in Users -->
+<div class="container" style="margin-bottom: 50px;">
+    <div id="usage-banner" style="background: white; border: 2px solid #B8973A; border-radius: 12px; padding: 25px; display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+            <div>
+                <h3 style="color: #0D1B2A; margin: 0 0 8px 0; font-weight: 700;">Your Current Plan</h3>
+                <p style="color: #64748B; margin: 0; font-size: 0.95rem;"><span id="usage-plan" style="font-weight: 600; color: #0D1B2A;">—</span> Plan</p>
+            </div>
+            <div>
+                <h3 style="color: #0D1B2A; margin: 0 0 8px 0; font-weight: 700;">AI Queries This Month</h3>
+                <p style="color: #64748B; margin: 0; font-size: 0.95rem;"><span id="usage-count" style="font-weight: 600; color: #0D1B2A;">—</span> / <span id="usage-limit" style="font-weight: 600; color: #0D1B2A;">—</span></p>
+                <div id="usage-bar" style="width: 200px; height: 6px; background: #f3f4f6; border-radius: 3px; margin-top: 8px; overflow: hidden;">
+                    <div id="usage-fill" style="height: 100%; background: #B8973A; width: 0%; transition: width 0.3s;"></div>
+                </div>
+            </div>
+            <div>
+                <h3 style="color: #0D1B2A; margin: 0 0 8px 0; font-weight: 700;">Estimated Monthly Cost</h3>
+                <p style="color: #64748B; margin: 0; font-size: 0.95rem;">$<span id="usage-cost" style="font-weight: 600; color: #0D1B2A;">0.00</span> USD</p>
+            </div>
+            <div style="text-align: right;">
+                <a href="{{ url_for('ai.dashboard') }}" style="background-color: #B8973A; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">View AI Tools</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('{{ url_for("ai.usage_stats") }}')
+        .then(r => r.json())
+        .then(data => {
+            const planName = {
+                'free': 'Free',
+                'research': 'Research & Judge Analytics',
+                'professional': 'Law Firms or Corporations',
+                'enterprise': 'Enterprise'
+            };
+
+            document.getElementById('usage-plan').textContent = planName[data.plan] || data.plan;
+            document.getElementById('usage-count').textContent = data.usage_count;
+
+            if (data.is_unlimited) {
+                document.getElementById('usage-limit').textContent = '∞';
+            } else {
+                document.getElementById('usage-limit').textContent = data.quota_limit;
+                const percentage = data.quota_limit > 0 ? (data.usage_count / data.quota_limit) * 100 : 0;
+                document.getElementById('usage-fill').style.width = Math.min(percentage, 100) + '%';
+            }
+
+            document.getElementById('usage-cost').textContent = data.monthly_cost.toFixed(2);
+            document.getElementById('usage-banner').style.display = 'block';
+        })
+        .catch(e => console.error('Failed to load usage stats:', e));
+});
+</script>
+{% endif %}
+
 <div class="container pricing-cards">
     <div class="row">
         <!-- Free Plan -->
