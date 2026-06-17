@@ -26,7 +26,7 @@ def index():
         ).limit(5).all()
 
         # Active alerts
-        active_alerts = Alert.query.join(SavedSearch).filter(
+        active_alerts = Alert.query.join(SavedSearch, Alert.saved_search_id == SavedSearch.id).filter(
             SavedSearch.user_id == current_user.id,
             Alert.is_active == True
         ).order_by(Alert.last_sent.desc()).limit(10).all()
