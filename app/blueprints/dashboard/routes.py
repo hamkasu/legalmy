@@ -211,7 +211,8 @@ def export_saved_cases():
     """Export bookmarked judgments as CSV."""
     try:
         # Check subscription plan
-        if current_user.subscription.plan == 'free':
+        subscription = current_user.subscriptions.first()
+        if not subscription or subscription.plan == 'free':
             return jsonify({'error': 'Upgrade required for CSV export'}), 402
 
         # Would generate CSV file

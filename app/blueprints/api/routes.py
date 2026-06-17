@@ -56,7 +56,8 @@ def require_api_key(f):
 
         # Check subscription
         user = api_key.user
-        if not user or not user.subscription or user.subscription.plan != 'firm':
+        subscription = user.subscriptions.first() if user else None
+        if not user or not subscription or subscription.plan != 'firm':
             return jsonify(api_response('error', error={
                 'code': 'SUBSCRIPTION_REQUIRED',
                 'message': 'API access requires Firm plan subscription',

@@ -102,10 +102,11 @@ class ApiKeyService:
         from app.models.user import User
 
         user = User.query.get(user_id)
-        if not user or not user.subscription:
+        subscription = user.subscriptions.first() if user else None
+        if not subscription:
             return 0
 
-        plan = user.subscription.plan
+        plan = subscription.plan
         # Only Firm plan has API access with 1000 requests/day
         if plan == 'firm':
             return 1000
