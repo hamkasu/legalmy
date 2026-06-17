@@ -12,8 +12,19 @@ class StripeService:
     """Stripe payment integration for LegalMY subscriptions."""
 
     def __init__(self):
-        stripe.api_key = current_app.config.get('STRIPE_SECRET_KEY')
-        self.webhook_secret = current_app.config.get('STRIPE_WEBHOOK_SECRET')
+        """Initialize StripeService - Stripe API key is set lazily on first use."""
+        self._initialized = False
+
+    def _ensure_initialized(self):
+        """Lazy initialization of Stripe API key (requires app context)."""
+        if not self._initialized:
+            stripe.api_key = current_app.config.get('STRIPE_SECRET_KEY')
+            self._initialized = True
+
+    @property
+    def webhook_secret(self):
+        """Get webhook secret from config."""
+        return current_app.config.get('STRIPE_WEBHOOK_SECRET')
 
     @staticmethod
     def get_plan_price_id(plan):
@@ -27,6 +38,7 @@ class StripeService:
 
     def create_checkout_session(self, user_id, plan):
         """Create Stripe Checkout session for subscription upgrade."""
+        self._ensure_initialized()
         from app.models.user import User
 
         user = User.query.get(user_id)
