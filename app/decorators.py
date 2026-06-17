@@ -26,7 +26,8 @@ def require_plan(min_plan):
                     return jsonify({'error': 'Authentication required'}), 401
                 return redirect(url_for('auth.login', next=request.url))
 
-            user_plan = current_user.subscription.plan if current_user.subscription else 'free'
+            subscription = current_user.subscriptions.first()
+            user_plan = subscription.plan if subscription else 'free'
             user_level = plan_hierarchy.get(user_plan, 0)
             required_level = plan_hierarchy.get(min_plan, 0)
 
