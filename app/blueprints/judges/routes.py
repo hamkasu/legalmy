@@ -1,14 +1,14 @@
 from flask import Blueprint, render_template, request, jsonify
-from app.blueprints.judges import judges_bp
 from app.models.judge import Judge, JudgeAnalytics
 from app.models.judgment import Judgment, CourtLevel
 from app.services.analytics_service import AnalyticsService
 from app.extensions import db
 
+bp = Blueprint('judges', __name__, template_folder='templates')
 analytics_service = AnalyticsService()
 
 
-@judges_bp.route('/', methods=['GET'])
+@bp.route('/', methods=['GET'])
 def index():
     """List all judges with search and filter."""
     page = request.args.get('page', 1, type=int)
@@ -62,7 +62,7 @@ def index():
     )
 
 
-@judges_bp.route('/<int:judge_id>', methods=['GET'])
+@bp.route('/<int:judge_id>', methods=['GET'])
 def profile(judge_id):
     """Judge profile with analytics and judgment history."""
     judge = Judge.query.get_or_404(judge_id)
@@ -91,7 +91,7 @@ def profile(judge_id):
     )
 
 
-@judges_bp.route('/api/<int:judge_id>/analytics', methods=['GET'])
+@bp.route('/api/<int:judge_id>/analytics', methods=['GET'])
 def api_get_analytics(judge_id):
     """API endpoint returning judge analytics as JSON."""
     judge = Judge.query.get(judge_id)

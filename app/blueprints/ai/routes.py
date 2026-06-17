@@ -1,14 +1,14 @@
 from flask import Blueprint, render_template, request, jsonify
 from flask_login import login_required, current_user
-from app.blueprints.ai import ai_bp
 from app.services.ai_tools_service import AIToolsService
 from app.extensions import db
 from datetime import datetime, timedelta
 
+bp = Blueprint('ai', __name__, template_folder='templates')
 ai_service = AIToolsService()
 
 
-@ai_bp.route('/', methods=['GET'])
+@bp.route('/', methods=['GET'])
 @login_required
 def dashboard():
     """AI Tools dashboard with all 6 tools."""
@@ -87,7 +87,7 @@ def dashboard():
     )
 
 
-@ai_bp.route('/case-analyser', methods=['GET', 'POST'])
+@bp.route('/case-analyser', methods=['GET', 'POST'])
 @login_required
 def case_analyser():
     """Tool 1: Case Analyser"""
@@ -104,7 +104,7 @@ def case_analyser():
     return render_template('ai/case-analyser.html')
 
 
-@ai_bp.route('/summariser', methods=['GET', 'POST'])
+@bp.route('/summariser', methods=['GET', 'POST'])
 @login_required
 def summariser():
     """Tool 2: Judgment Summariser"""
@@ -121,7 +121,7 @@ def summariser():
     return render_template('ai/summariser.html')
 
 
-@ai_bp.route('/argument-generator', methods=['GET', 'POST'])
+@bp.route('/argument-generator', methods=['GET', 'POST'])
 @login_required
 def argument_generator():
     """Tool 3: Legal Argument Generator"""
@@ -139,7 +139,7 @@ def argument_generator():
     return render_template('ai/argument-generator.html')
 
 
-@ai_bp.route('/timeline-builder', methods=['GET', 'POST'])
+@bp.route('/timeline-builder', methods=['GET', 'POST'])
 @login_required
 def timeline_builder():
     """Tool 4: Case Timeline Builder"""
@@ -156,7 +156,7 @@ def timeline_builder():
     return render_template('ai/timeline-builder.html')
 
 
-@ai_bp.route('/counsel-research', methods=['GET', 'POST'])
+@bp.route('/counsel-research', methods=['GET', 'POST'])
 @login_required
 def counsel_research():
     """Tool 5: Opposing Counsel Research"""
@@ -172,7 +172,7 @@ def counsel_research():
     return render_template('ai/counsel-research.html')
 
 
-@ai_bp.route('/explain-law', methods=['GET', 'POST'])
+@bp.route('/explain-law', methods=['GET', 'POST'])
 @login_required
 def explain_law():
     """Tool 6: Legislation Explainer"""
