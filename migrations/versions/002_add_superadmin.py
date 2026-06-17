@@ -32,13 +32,13 @@ def upgrade():
             'hamka.suleiman@calmic.com.my',
             'Hamka Suleiman',
             '$2b$12$lM520kbZ5FqSyn35DQddTuX4q.c2EYmIpNms6S2VEPppsznUgS8TS',
-            'ADMIN',
+            'admin',
             true,
             true,
             '{}',
             NOW()
         ) ON CONFLICT (email) DO UPDATE SET
-            role = 'ADMIN',
+            role = 'admin',
             is_active = true,
             is_verified = true,
             password_hash = '$2b$12$lM520kbZ5FqSyn35DQddTuX4q.c2EYmIpNms6S2VEPppsznUgS8TS'
