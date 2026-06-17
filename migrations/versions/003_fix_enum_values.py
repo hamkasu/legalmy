@@ -20,6 +20,9 @@ def upgrade():
     # Update UserRole enum values from lowercase to uppercase
     # PostgreSQL requires dropping and recreating enum types
 
+    # Drop the default constraint first
+    op.execute("ALTER TABLE users ALTER COLUMN role DROP DEFAULT;")
+
     # Update existing data first by casting to text, changing values, then back to enum
     op.execute("""
         ALTER TABLE users
@@ -44,7 +47,12 @@ def upgrade():
         ALTER COLUMN role TYPE userrole USING role::userrole;
     """)
 
+    # Re-add the default constraint
+    op.execute("ALTER TABLE users ALTER COLUMN role SET DEFAULT 'FREE';")
+
     # Update SubscriptionStatus enum values
+    op.execute("ALTER TABLE subscriptions ALTER COLUMN status DROP DEFAULT;")
+
     op.execute("""
         ALTER TABLE subscriptions
         ALTER COLUMN status TYPE text USING status::text;
@@ -64,6 +72,8 @@ def upgrade():
         ALTER TABLE subscriptions
         ALTER COLUMN status TYPE subscriptionstatus USING status::subscriptionstatus;
     """)
+
+    op.execute("ALTER TABLE subscriptions ALTER COLUMN status SET DEFAULT 'TRIAL';")
 
     # Update OutcomeType enum values
     op.execute("""
@@ -192,6 +202,8 @@ def upgrade():
     """)
 
     # Update AlertFrequency enum values
+    op.execute("ALTER TABLE alerts ALTER COLUMN frequency DROP DEFAULT;")
+
     op.execute("""
         ALTER TABLE alerts
         ALTER COLUMN frequency TYPE text USING frequency::text;
@@ -211,6 +223,8 @@ def upgrade():
         ALTER TABLE alerts
         ALTER COLUMN frequency TYPE alertfrequency USING frequency::alertfrequency;
     """)
+
+    op.execute("ALTER TABLE alerts ALTER COLUMN frequency SET DEFAULT 'DAILY';")
 
 
 def downgrade():
