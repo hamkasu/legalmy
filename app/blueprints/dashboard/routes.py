@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 def index():
     """Main subscriber dashboard."""
     try:
-        subscription = current_user.subscription
+        subscription = current_user.subscriptions.first()
         plan_info = PLANS.get(subscription.plan, {}) if subscription else PLANS['free']
 
         # Recent searches (last 5 SavedSearch records)
