@@ -5,10 +5,10 @@ from app.extensions import db
 
 
 class UserRole(Enum):
-    FREE = 'FREE'
-    SUBSCRIBER = 'SUBSCRIBER'
-    ADMIN = 'ADMIN'
-    API = 'API'
+    FREE = 'free'
+    SUBSCRIBER = 'subscriber'
+    ADMIN = 'admin'
+    API = 'api'
 
 
 class User(db.Model):
@@ -53,9 +53,9 @@ class User(db.Model):
 
 
 class SubscriptionStatus(Enum):
-    ACTIVE = 'ACTIVE'
-    CANCELLED = 'CANCELLED'
-    TRIAL = 'TRIAL'
+    ACTIVE = 'active'
+    CANCELLED = 'cancelled'
+    TRIAL = 'trial'
 
 
 class Subscription(db.Model):
