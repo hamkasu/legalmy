@@ -396,3 +396,69 @@ def system_health():
         active_api_keys=active_keys,
         env_info=env_info
     )
+
+
+@bp.route('/ai-analytics')
+def ai_analytics():
+    """AI usage analytics dashboard."""
+    from app.services.usage_service import UsageService
+
+    # Overall stats
+    month_start = datetime.utcnow().replace(day=1)
+    total_queries = AIUsage.query.filter(
+        AIUsage.created_at >= month_start
+    ).count()
+    total_cost = db.session.query(
+        func.sum(AIUsage.cost_usd)
+    ).filter(AIUsage.created_at >= month_start).scalar() or 0.0
+
+    # By tool breakdown
+    by_tool = db.session.query(
+        AIUsage.tool_name,
+        func.count(AIUsage.id).label('count'),
+        func.sum(AIUsage.cost_usd).label('cost'),
+        func.avg(AIUsage.input_tokens).label('avg_input'),
+        func.avg(AIUsage.output_tokens).label('avg_output')
+    ).filter(AIUsage.created_at >= month_start).group_by(
+        AIUsage.tool_name
+    ).order_by(desc(func.count(AIUsage.id))).all()
+
+    # By user breakdown
+    by_user = db.session.query(
+        User.email,
+        User.full_name,
+        func.count(AIUsage.id).label('count'),
+        func.sum(AIUsage.cost_usd).label('cost')
+    ).join(AIUsage, User.id == AIUsage.user_id).filter(
+        AIUsage.created_at >= month_start
+    ).group_by(User.id).order_by(desc(func.count(AIUsage.id))).limit(50).all()
+
+    # By plan breakdown
+    by_plan = db.session.query(
+        Subscription.plan,
+        func.count(AIUsage.id).label('count'),
+        func.sum(AIUsage.cost_usd).label('cost')
+    ).join(User, User.id == AIUsage.user_id).outerjoin(
+        Subscription, User.id == Subscription.user_id
+    ).filter(AIUsage.created_at >= month_start).group_by(
+        Subscription.plan
+    ).all()
+
+    # Daily trend
+    daily_data = db.session.query(
+        func.date(AIUsage.created_at).label('date'),
+        func.count(AIUsage.id).label('count'),
+        func.sum(AIUsage.cost_usd).label('cost')
+    ).filter(AIUsage.created_at >= month_start).group_by(
+        func.date(AIUsage.created_at)
+    ).order_by('date').all()
+
+    return render_template('admin/ai-analytics.html',
+        total_queries=total_queries,
+        total_cost=round(total_cost, 2),
+        by_tool=by_tool,
+        by_user=by_user,
+        by_plan=by_plan,
+        daily_data=daily_data,
+        month_start=month_start
+    )
