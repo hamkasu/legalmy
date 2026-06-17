@@ -4,8 +4,8 @@ from app.extensions import db
 
 
 class AlertFrequency(Enum):
-    DAILY = 'daily'
-    WEEKLY = 'weekly'
+    DAILY = 'DAILY'
+    WEEKLY = 'WEEKLY'
 
 
 class SavedSearch(db.Model):

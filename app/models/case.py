@@ -5,28 +5,28 @@ from app.models.judgment import CourtLevel
 
 
 class CaseStatus(Enum):
-    ACTIVE = 'active'
-    DECIDED = 'decided'
-    STRUCK_OUT = 'struck_out'
-    SETTLED = 'settled'
+    ACTIVE = 'ACTIVE'
+    DECIDED = 'DECIDED'
+    STRUCK_OUT = 'STRUCK_OUT'
+    SETTLED = 'SETTLED'
 
 
 class PartyRole(Enum):
-    PLAINTIFF = 'plaintiff'
-    DEFENDANT = 'defendant'
-    INTERVENER = 'intervener'
-    APPELLANT = 'appellant'
-    RESPONDENT = 'respondent'
-    CLAIMANT = 'claimant'
+    PLAINTIFF = 'PLAINTIFF'
+    DEFENDANT = 'DEFENDANT'
+    INTERVENER = 'INTERVENER'
+    APPELLANT = 'APPELLANT'
+    RESPONDENT = 'RESPONDENT'
+    CLAIMANT = 'CLAIMANT'
 
 
 class DocumentType(Enum):
-    STATEMENT_OF_CLAIM = 'statement_of_claim'
-    DEFENCE = 'defence'
-    AFFIDAVIT = 'affidavit'
-    WRITTEN_SUBMISSION = 'written_submission'
-    ORDER = 'order'
-    JUDGMENT = 'judgment'
+    STATEMENT_OF_CLAIM = 'STATEMENT_OF_CLAIM'
+    DEFENCE = 'DEFENCE'
+    AFFIDAVIT = 'AFFIDAVIT'
+    WRITTEN_SUBMISSION = 'WRITTEN_SUBMISSION'
+    ORDER = 'ORDER'
+    JUDGMENT = 'JUDGMENT'
 
 
 class Case(db.Model):
