@@ -1,176 +1,399 @@
 {% extends "base.html" %}
 
-{% block title %}Pricing - LegalMY{% endblock %}
+{% block title %}Plans & Pricing - LegalMY{% endblock %}
 
 {% block content %}
-<div class="container pricing-page" style="padding: 60px 0;">
-    <div style="text-align: center; margin-bottom: 60px;">
-        <h1 style="font-family: 'Merriweather', serif; color: #0D1B2A; margin-bottom: 15px; font-size: 2.5rem;">Transparent Pricing</h1>
-        <p style="color: #64748B; font-size: 1.1rem; margin-bottom: 30px;">Choose the right plan for your legal research needs</p>
+<style>
+    .pricing-header { text-align: center; padding: 60px 0; background: linear-gradient(135deg, #f5f7fa 0%, #fff 100%); }
+    .pricing-header h1 { font-size: 2.5rem; color: #0D1B2A; margin-bottom: 15px; font-weight: 700; }
+    .pricing-header p { font-size: 1.1rem; color: #64748B; margin-bottom: 40px; }
+    .billing-toggle { display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 40px; }
+    .toggle-btn { background: #e5e7eb; border-radius: 25px; padding: 6px; display: inline-flex; border: none; }
+    .toggle-btn button { background: white; border: none; padding: 8px 18px; border-radius: 20px; color: #0D1B2A; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+    .toggle-btn button.inactive { background: transparent; color: #64748B; }
+    .savings-badge { background: #FF9F43; color: white; padding: 6px 14px; border-radius: 50px; font-size: 0.9rem; font-weight: 600; }
 
-        <!-- Billing Toggle -->
-        <div style="display: flex; justify-content: center; align-items: center; gap: 20px;">
-            <span style="color: #64748B;">Monthly</span>
-            <div style="background: #e5e7eb; border-radius: 20px; padding: 4px; display: inline-flex; gap: 0;">
-                <button onclick="toggleBilling('monthly')" id="monthly-btn" style="background: white; border: none; padding: 6px 16px; border-radius: 16px; color: #0D1B2A; font-weight: 600; cursor: pointer; transition: all 0.3s;">Monthly</button>
-                <button onclick="toggleBilling('annual')" id="annual-btn" style="background: transparent; border: none; padding: 6px 16px; border-radius: 16px; color: #64748B; cursor: pointer; transition: all 0.3s;">Annual</button>
-            </div>
-            <span style="color: #64748B;">Annual <span style="color: #16A34A; font-weight: 600;">Save 20%</span></span>
+    .pricing-cards { margin-bottom: 80px; }
+    .pricing-card { background: white; border-radius: 12px; padding: 40px; margin-bottom: 30px; border: 2px solid #e5e7eb; transition: all 0.3s; }
+    .pricing-card:hover { border-color: #B8973A; box-shadow: 0 10px 30px rgba(184, 151, 58, 0.1); }
+    .pricing-card.popular { border-color: #B8973A; box-shadow: 0 10px 40px rgba(184, 151, 58, 0.15); position: relative; }
+    .pricing-card.popular::before { content: 'POPULAR'; position: absolute; top: -15px; left: 30px; background: #B8973A; color: white; padding: 6px 14px; border-radius: 50px; font-size: 0.85rem; font-weight: 700; }
+
+    .card-name { font-size: 1.4rem; color: #0D1B2A; font-weight: 700; margin-bottom: 20px; margin-top: 5px; }
+    .card-price { font-size: 2.8rem; color: #0D1B2A; font-weight: 700; margin-bottom: 5px; }
+    .card-price-label { color: #64748B; font-size: 1rem; }
+    .card-description { color: #64748B; font-size: 0.95rem; margin: 20px 0 30px 0; }
+    .card-features { list-style: none; padding: 0; margin: 30px 0; flex-grow: 1; }
+    .card-features li { padding: 12px 0; color: #64748B; border-bottom: 1px solid #f3f4f6; font-size: 0.95rem; }
+    .card-features li:before { content: "✓ "; color: #16A34A; font-weight: 700; margin-right: 8px; }
+    .card-cta { width: 100%; padding: 12px; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; transition: all 0.3s; font-size: 1rem; text-decoration: none; display: block; text-align: center; }
+    .card-cta.primary { background-color: #B8973A; color: white; }
+    .card-cta.primary:hover { background-color: #a0822e; }
+    .card-cta.secondary { background-color: #f3f4f6; color: #0D1B2A; }
+    .card-cta.secondary:hover { background-color: #e5e7eb; }
+
+    .comparison-section { margin-bottom: 80px; }
+    .comparison-title { font-size: 1.8rem; color: #0D1B2A; font-weight: 700; margin-bottom: 40px; text-align: center; }
+    .comparison-table { overflow-x: auto; }
+    .comparison-table table { width: 100%; border-collapse: collapse; background: white; }
+    .comparison-table th { background: #f3f4f6; color: #0D1B2A; font-weight: 700; padding: 16px; text-align: left; border-bottom: 2px solid #e5e7eb; font-size: 0.95rem; }
+    .comparison-table td { padding: 16px; border-bottom: 1px solid #f3f4f6; }
+    .comparison-table .feature-name { font-weight: 600; color: #0D1B2A; width: 220px; }
+    .comparison-table .feature-value { text-align: center; color: #64748B; }
+    .comparison-table .check { color: #16A34A; font-weight: 700; }
+    .comparison-table .cross { color: #EF4444; font-weight: 700; }
+
+    .addons-section { margin-bottom: 80px; }
+    .addons-title { font-size: 1.8rem; color: #0D1B2A; font-weight: 700; margin-bottom: 40px; text-align: center; }
+    .addon-card { background: white; border: 2px solid #e5e7eb; border-radius: 12px; padding: 30px; margin-bottom: 20px; }
+    .addon-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px; }
+    .addon-name { font-size: 1.1rem; font-weight: 700; color: #0D1B2A; }
+    .addon-price { color: #B8973A; font-weight: 700; }
+    .addon-description { color: #64748B; font-size: 0.95rem; }
+
+    .trust-signals { background: #f3f4f6; padding: 50px; border-radius: 12px; margin-bottom: 80px; }
+    .signal-item { text-align: center; }
+    .signal-number { font-size: 2.2rem; font-weight: 700; color: #0D1B2A; margin-bottom: 8px; }
+    .signal-label { color: #64748B; font-size: 0.95rem; }
+
+    .faq-section { max-width: 900px; margin: 0 auto 80px; }
+    .faq-title { font-size: 1.8rem; color: #0D1B2A; font-weight: 700; margin-bottom: 40px; text-align: center; }
+    .faq-item { background: white; padding: 25px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid #B8973A; }
+    .faq-question { font-size: 1.05rem; font-weight: 700; color: #0D1B2A; margin-bottom: 12px; }
+    .faq-answer { color: #64748B; line-height: 1.6; }
+
+    .footer-cta { text-align: center; padding: 60px 20px; background: #f3f4f6; border-radius: 12px; }
+    .footer-cta h3 { color: #0D1B2A; font-weight: 700; font-size: 1.5rem; margin-bottom: 20px; }
+    .footer-cta p { color: #64748B; margin-bottom: 30px; font-size: 1.05rem; }
+</style>
+
+<div class="pricing-header">
+    <h1>Plans & Pricing</h1>
+    <p>Unlock Your Legal Intelligence with LegalMY</p>
+
+    <div class="billing-toggle">
+        <span style="color: #64748B;">Monthly</span>
+        <div class="toggle-btn">
+            <button id="monthly-btn" onclick="toggleBilling('monthly')">Monthly</button>
+            <button id="annual-btn" class="inactive" onclick="toggleBilling('annual')">Annually</button>
         </div>
+        <span style="color: #64748B;">Annually <span class="savings-badge">Save 25%</span></span>
     </div>
+</div>
 
-    <!-- Pricing Cards -->
-    <div class="row" style="margin-bottom: 60px;">
+<div class="container pricing-cards">
+    <div class="row">
         <!-- Free Plan -->
-        <div class="col-lg-3 col-md-6" style="margin-bottom: 30px;">
-            <div style="background: white; padding: 30px; border-radius: 8px; border: 2px solid #e5e7eb; height: 100%; display: flex; flex-direction: column;">
-                <h3 style="color: #0D1B2A; font-weight: bold; margin-bottom: 10px;">Free</h3>
-                <div style="margin-bottom: 20px;">
-                    <span style="font-size: 2rem; font-weight: bold; color: #0D1B2A;">RM 0</span>
-                    <span style="color: #64748B; font-size: 0.9rem;">/month</span>
-                </div>
-
-                <ul style="list-style: none; padding: 0; margin-bottom: 30px; flex-grow: 1;">
-                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ 10 searches/day</li>
-                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ No AI tools</li>
-                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ Basic judgment view</li>
-                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ 1 saved search</li>
-                    <li style="padding: 10px 0; color: #64748B;">✗ No judge analytics</li>
+        <div class="col-lg-4 col-md-6">
+            <div class="pricing-card">
+                <div class="card-name">Research</div>
+                <div class="card-price">RM 0</div>
+                <div class="card-price-label">/month</div>
+                <div class="card-description">Perfect for students and initial research</div>
+                <ul class="card-features">
+                    <li>Basic search</li>
+                    <li>10 searches/day</li>
+                    <li>Limited judgment access</li>
+                    <li>1 saved search</li>
+                    <li>Community support</li>
                 </ul>
-
-                <button class="btn btn-secondary" style="width: 100%; border-radius: 4px;">Current Plan</button>
+                <button class="card-cta secondary" onclick="location.href='/'">Get Started</button>
             </div>
         </div>
 
-        <!-- Starter Plan -->
-        <div class="col-lg-3 col-md-6" style="margin-bottom: 30px;">
-            <div style="background: white; padding: 30px; border-radius: 8px; border: 3px solid #B8973A; position: relative; height: 100%; display: flex; flex-direction: column; box-shadow: 0 8px 24px rgba(184, 151, 58, 0.15);">
-                <div style="position: absolute; top: -15px; left: 20px; background: #B8973A; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">POPULAR</div>
-                <h3 style="color: #0D1B2A; font-weight: bold; margin-bottom: 10px; margin-top: 10px;">Starter</h3>
-                <div style="margin-bottom: 20px;">
-                    <span style="font-size: 2rem; font-weight: bold; color: #0D1B2A;">RM 99</span>
-                    <span style="color: #64748B; font-size: 0.9rem;" id="starter-annual" style="display: none;"> RM 792/year</span>
-                    <span style="color: #64748B; font-size: 0.9rem;">/month</span>
-                </div>
-
-                <ul style="list-style: none; padding: 0; margin-bottom: 30px; flex-grow: 1;">
-                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ Unlimited searches</li>
-                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ 50 AI queries/month</li>
-                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ Full judgment access</li>
-                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ 5 saved searches</li>
-                    <li style="padding: 10px 0; color: #64748B;">✓ Judge analytics</li>
+        <!-- Research & Judge Plan -->
+        <div class="col-lg-4 col-md-6">
+            <div class="pricing-card popular">
+                <div class="card-name">Research & Judge Analytics</div>
+                <div class="card-price">RM 139.95</div>
+                <div class="card-price-label">/month</div>
+                <div class="card-description">Most popular for individual lawyers</div>
+                <ul class="card-features">
+                    <li>Unlimited searches</li>
+                    <li>50 AI queries/month</li>
+                    <li>Full judgment access</li>
+                    <li>Judge analytics & insights</li>
+                    <li>5 saved searches</li>
+                    <li>Email support</li>
                 </ul>
-
-                <a href="{{ url_for('auth.upgrade_plan', plan='starter') }}" class="btn btn-primary" style="width: 100%; background-color: #B8973A; border-color: #B8973A; color: #0D1B2A; font-weight: 600; border-radius: 4px; text-decoration: none;">Upgrade to Starter</a>
+                <a href="{{ url_for('auth.upgrade_plan', plan='research') }}" class="card-cta primary">Start My Free Trial</a>
             </div>
         </div>
 
         <!-- Professional Plan -->
-        <div class="col-lg-3 col-md-6" style="margin-bottom: 30px;">
-            <div style="background: white; padding: 30px; border-radius: 8px; border: 2px solid #e5e7eb; height: 100%; display: flex; flex-direction: column;">
-                <h3 style="color: #0D1B2A; font-weight: bold; margin-bottom: 10px;">Professional</h3>
-                <div style="margin-bottom: 20px;">
-                    <span style="font-size: 2rem; font-weight: bold; color: #0D1B2A;">RM 299</span>
-                    <span style="color: #64748B; font-size: 0.9rem;">/month</span>
-                </div>
-
-                <ul style="list-style: none; padding: 0; margin-bottom: 30px; flex-grow: 1;">
-                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ Unlimited searches</li>
-                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ 500 AI queries/month</li>
-                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ Unlimited exports</li>
-                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ 25 saved searches</li>
-                    <li style="padding: 10px 0; color: #64748B;">✓ Judge + Lawyer analytics</li>
+        <div class="col-lg-4 col-md-6">
+            <div class="pricing-card">
+                <div class="card-name">Law Firms or Corporations</div>
+                <div class="card-price">RM 209.95</div>
+                <div class="card-price-label">/month</div>
+                <div class="card-description">For teams and law firms</div>
+                <ul class="card-features">
+                    <li>Unlimited searches</li>
+                    <li>500 AI queries/month</li>
+                    <li>Full judgment exports</li>
+                    <li>Unlimited team seats</li>
+                    <li>Advanced judge analytics</li>
+                    <li>Priority support</li>
                 </ul>
-
-                <a href="{{ url_for('auth.upgrade_plan', plan='professional') }}" class="btn btn-primary" style="width: 100%; background-color: #B8973A; border-color: #B8973A; color: #0D1B2A; font-weight: 600; border-radius: 4px; text-decoration: none;">Upgrade to Professional</a>
-            </div>
-        </div>
-
-        <!-- Firm Plan -->
-        <div class="col-lg-3 col-md-6" style="margin-bottom: 30px;">
-            <div style="background: white; padding: 30px; border-radius: 8px; border: 2px solid #e5e7eb; height: 100%; display: flex; flex-direction: column;">
-                <h3 style="color: #0D1B2A; font-weight: bold; margin-bottom: 10px;">Firm</h3>
-                <div style="margin-bottom: 20px;">
-                    <span style="font-size: 2rem; font-weight: bold; color: #0D1B2A;">RM 999</span>
-                    <span style="color: #64748B; font-size: 0.9rem;">/month</span>
-                </div>
-
-                <ul style="list-style: none; padding: 0; margin-bottom: 30px; flex-grow: 1;">
-                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ Unlimited everything</li>
-                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ 10 team seats</li>
-                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ API access</li>
-                    <li style="padding: 10px 0; color: #64748B; border-bottom: 1px solid #e5e7eb;">✓ Priority support</li>
-                    <li style="padding: 10px 0; color: #64748B;">✓ Custom integrations</li>
-                </ul>
-
-                <a href="{{ url_for('auth.upgrade_plan', plan='firm') }}" class="btn btn-primary" style="width: 100%; background-color: #B8973A; border-color: #B8973A; color: #0D1B2A; font-weight: 600; border-radius: 4px; text-decoration: none;">Upgrade to Firm</a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Trust Signals -->
-    <div style="background: #f3f4f6; padding: 40px; border-radius: 8px; margin-bottom: 60px;">
-        <div class="row" style="text-align: center;">
-            <div class="col-md-4" style="margin-bottom: 20px;">
-                <div style="font-size: 2rem; font-weight: bold; color: #0D1B2A;">500+</div>
-                <div style="color: #64748B;">Malaysian lawyers</div>
-            </div>
-            <div class="col-md-4" style="margin-bottom: 20px;">
-                <div style="font-size: 2rem; font-weight: bold; color: #0D1B2A;">100,000+</div>
-                <div style="color: #64748B;">Judgments indexed</div>
-            </div>
-            <div class="col-md-4" style="margin-bottom: 20px;">
-                <div style="font-size: 2rem; font-weight: bold; color: #0D1B2A;">256-bit</div>
-                <div style="color: #64748B;">Encryption standard</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- FAQ Section -->
-    <div style="max-width: 800px; margin: 0 auto;">
-        <h2 style="color: #0D1B2A; font-weight: bold; margin-bottom: 30px; text-align: center;">Frequently Asked Questions</h2>
-
-        <div style="margin-bottom: 20px;">
-            <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #B8973A;">
-                <h5 style="color: #0D1B2A; font-weight: bold; margin-bottom: 10px;">Can I cancel anytime?</h5>
-                <p style="color: #64748B; margin-bottom: 0;">Yes, you can cancel your subscription at any time from your account settings. No long-term contracts or cancellation fees.</p>
-            </div>
-        </div>
-
-        <div style="margin-bottom: 20px;">
-            <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #B8973A;">
-                <h5 style="color: #0D1B2A; font-weight: bold; margin-bottom: 10px;">Do you offer annual discounts?</h5>
-                <p style="color: #64748B; margin-bottom: 0;">Yes! Pay annually and save 20% on all plans. Switch from monthly to annual billing in your settings at any time.</p>
-            </div>
-        </div>
-
-        <div style="margin-bottom: 20px;">
-            <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #B8973A;">
-                <h5 style="color: #0D1B2A; font-weight: bold; margin-bottom: 10px;">What payment methods do you accept?</h5>
-                <p style="color: #64748B; margin-bottom: 0;">We accept credit cards (Visa, Mastercard), debit cards, and FPX (Malaysian online banking). All payments are processed securely via Stripe.</p>
-            </div>
-        </div>
-
-        <div style="margin-bottom: 20px;">
-            <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #B8973A;">
-                <h5 style="color: #0D1B2A; font-weight: bold; margin-bottom: 10px;">Is there a free trial?</h5>
-                <p style="color: #64748B; margin-bottom: 0;">Our Free plan is essentially a free trial with limited features. Verified lawyers get a 30-day Professional trial after admin approval.</p>
+                <a href="{{ url_for('auth.upgrade_plan', plan='professional') }}" class="card-cta primary">Contact Us</a>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Comparison Table -->
+<div class="container comparison-section">
+    <h2 class="comparison-title">Compare Plans</h2>
+    <div class="comparison-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th style="text-align: center;">Research</th>
+                    <th style="text-align: center;">Research & Judge Analytics</th>
+                    <th style="text-align: center;">Law Firms or Corporations</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="feature-name">Search <span style="color: #999; font-size: 0.85rem; cursor: help;" title="Case law and judgment database search">ℹ</span></td>
+                    <td class="feature-value"><span class="check">✓</span></td>
+                    <td class="feature-value"><span class="check">✓</span></td>
+                    <td class="feature-value"><span class="check">✓</span></td>
+                </tr>
+                <tr>
+                    <td class="feature-name">Alerts <span style="color: #999; font-size: 0.85rem; cursor: help;" title="Notifications for new cases matching your searches">ℹ</span></td>
+                    <td class="feature-value"><span class="cross">✗</span></td>
+                    <td class="feature-value"><span class="check">✓</span></td>
+                    <td class="feature-value"><span class="check">✓</span></td>
+                </tr>
+                <tr>
+                    <td class="feature-name">Motions/Issues <span style="color: #999; font-size: 0.85rem; cursor: help;" title="Filter and analyze legal issues and motions">ℹ</span></td>
+                    <td class="feature-value"><span class="cross">✗</span></td>
+                    <td class="feature-value"><span class="check">✓</span></td>
+                    <td class="feature-value"><span class="check">✓</span></td>
+                </tr>
+                <tr>
+                    <td class="feature-name">Judge Bias <span style="color: #999; font-size: 0.85rem; cursor: help;" title="Analyze judge bias and decision patterns">ℹ</span></td>
+                    <td class="feature-value"><span class="cross">✗</span></td>
+                    <td class="feature-value"><span class="check">✓</span></td>
+                    <td class="feature-value"><span class="check">✓</span></td>
+                </tr>
+                <tr>
+                    <td class="feature-name">Case Updates <span style="color: #999; font-size: 0.85rem; cursor: help;" title="Get notifications on case status changes">ℹ</span></td>
+                    <td class="feature-value"><span class="cross">✗</span></td>
+                    <td class="feature-value"><span class="check">✓</span></td>
+                    <td class="feature-value"><span class="check">✓</span></td>
+                </tr>
+                <tr>
+                    <td class="feature-name">Legal Summaries <span style="color: #999; font-size: 0.85rem; cursor: help;" title="AI-powered case summaries">ℹ</span></td>
+                    <td class="feature-value"><span class="cross">✗</span></td>
+                    <td class="feature-value"><span class="check">✓</span></td>
+                    <td class="feature-value"><span class="check">✓</span></td>
+                </tr>
+                <tr>
+                    <td class="feature-name">Accounts <span style="color: #999; font-size: 0.85rem; cursor: help;" title="Number of user accounts per subscription">ℹ</span></td>
+                    <td class="feature-value">1 Account</td>
+                    <td class="feature-value">1 Account</td>
+                    <td class="feature-value">Unlimited Accounts</td>
+                </tr>
+                <tr>
+                    <td class="feature-name">Jurisdictions</td>
+                    <td class="feature-value">Federal Courts</td>
+                    <td class="feature-value">Federal Courts</td>
+                    <td class="feature-value">All States</td>
+                </tr>
+                <tr>
+                    <td class="feature-name">Content Views Per Month</td>
+                    <td class="feature-value">75</td>
+                    <td class="feature-value">75</td>
+                    <td class="feature-value">Unlimited</td>
+                </tr>
+                <tr style="background: #f3f4f6; font-weight: 700;">
+                    <td colspan="4" class="feature-name">JUDGE ANALYTICS</td>
+                </tr>
+                <tr>
+                    <td class="feature-name">Judge Overview & Statistics</td>
+                    <td class="feature-value"><span class="cross">✗</span></td>
+                    <td class="feature-value"><span class="check">✓</span></td>
+                    <td class="feature-value"><span class="check">✓</span></td>
+                </tr>
+                <tr>
+                    <td class="feature-name">Motion Success Rates</td>
+                    <td class="feature-value"><span class="cross">✗</span></td>
+                    <td class="feature-value"><span class="check">✓</span></td>
+                    <td class="feature-value"><span class="check">✓</span></td>
+                </tr>
+                <tr>
+                    <td class="feature-name">Case Outcome Analytics</td>
+                    <td class="feature-value"><span class="cross">✗</span></td>
+                    <td class="feature-value"><span class="check">✓</span></td>
+                    <td class="feature-value"><span class="check">✓</span></td>
+                </tr>
+                <tr>
+                    <td class="feature-name">Case Timeline Analysis</td>
+                    <td class="feature-value"><span class="cross">✗</span></td>
+                    <td class="feature-value"><span class="check">✓</span></td>
+                    <td class="feature-value"><span class="check">✓</span></td>
+                </tr>
+                <tr>
+                    <td class="feature-name">Automated Reports</td>
+                    <td class="feature-value"><span class="cross">✗</span></td>
+                    <td class="feature-value"><span class="check">✓</span></td>
+                    <td class="feature-value"><span class="check">✓</span></td>
+                </tr>
+                <tr style="background: #f3f4f6; font-weight: 700;">
+                    <td colspan="4" class="feature-name">ADD-ONS</td>
+                </tr>
+                <tr>
+                    <td class="feature-name">Judge Analytics Insights</td>
+                    <td class="feature-value">-</td>
+                    <td class="feature-value"><span class="check">✓</span></td>
+                    <td class="feature-value"><span class="check">✓</span></td>
+                </tr>
+                <tr>
+                    <td class="feature-name">Lawyer Database</td>
+                    <td class="feature-value"><span class="cross">✗</span></td>
+                    <td class="feature-value"><span class="cross">✗</span></td>
+                    <td class="feature-value">$</td>
+                </tr>
+                <tr>
+                    <td class="feature-name">Court Comparison</td>
+                    <td class="feature-value"><span class="cross">✗</span></td>
+                    <td class="feature-value"><span class="cross">✗</span></td>
+                    <td class="feature-value"><span class="check">✓</span></td>
+                </tr>
+                <tr>
+                    <td class="feature-name">Daily Filings Report</td>
+                    <td class="feature-value"><span class="cross">✗</span></td>
+                    <td class="feature-value"><span class="cross">✗</span></td>
+                    <td class="feature-value">$</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add-ons Section -->
+<div class="container addons-section">
+    <h2 class="addons-title">Add-ons & Premium Features</h2>
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="addon-card">
+                <div class="addon-header">
+                    <div class="addon-name">Judge Analytics Insights</div>
+                    <div class="addon-price">$15/month</div>
+                </div>
+                <p class="addon-description">Advanced analytics on judge behavior, sentencing patterns, and decision trends. Get detailed insights into judge preferences and case outcomes.</p>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="addon-card">
+                <div class="addon-header">
+                    <div class="addon-name">Lawyer Database</div>
+                    <div class="addon-price">$20/month</div>
+                </div>
+                <p class="addon-description">Access complete lawyer profiles, case histories, and professional networks. Find co-counsel and referral partners instantly.</p>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="addon-card">
+                <div class="addon-header">
+                    <div class="addon-name">Court Comparison</div>
+                    <div class="addon-price">Included</div>
+                </div>
+                <p class="addon-description">Compare case outcomes and judge performance across different courts. Make data-driven decisions on venue selection.</p>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="addon-card">
+                <div class="addon-header">
+                    <div class="addon-name">Daily Filings Report</div>
+                    <div class="addon-price">$25/month</div>
+                </div>
+                <p class="addon-description">Daily digest of new case filings matching your practice areas. Stay updated with the latest developments instantly.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Trust Signals -->
+<div class="container trust-signals">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="signal-item">
+                <div class="signal-number">500+</div>
+                <div class="signal-label">Malaysian Lawyers Trust LegalMY</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="signal-item">
+                <div class="signal-number">100,000+</div>
+                <div class="signal-label">Judgments Indexed & Analyzed</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="signal-item">
+                <div class="signal-number">99.9%</div>
+                <div class="signal-label">Platform Uptime Guarantee</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FAQ Section -->
+<div class="faq-section">
+    <h2 class="faq-title">Frequently Asked Questions</h2>
+
+    <div class="faq-item">
+        <div class="faq-question">Can I cancel my subscription anytime?</div>
+        <p class="faq-answer">Yes, absolutely! You can cancel your subscription at any time from your account settings. No long-term contracts, no cancellation fees. Your access continues through the end of your billing period.</p>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">Do you offer annual billing discounts?</div>
+        <p class="faq-answer">Yes! When you choose annual billing, you'll save 25% compared to monthly pricing. You can upgrade to annual or switch plans anytime in your account settings.</p>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">What payment methods do you accept?</div>
+        <p class="faq-answer">We accept all major credit cards (Visa, Mastercard, American Express), debit cards, and FPX (Malaysian online banking). All payments are processed securely through Stripe with bank-level encryption.</p>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">Is there a free trial available?</div>
+        <p class="faq-answer">Yes! Our Free plan is available to all users with limited features. For individual lawyers, we offer a 14-day free trial of Research & Judge Analytics. No credit card required to start.</p>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">Can I upgrade or downgrade my plan?</div>
+        <p class="faq-answer">Absolutely! You can change your plan anytime. Upgrades take effect immediately, and we'll prorate any charges based on your remaining billing period.</p>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">Do you offer discounts for law firms?</div>
+        <p class="faq-answer">Yes! We offer special pricing and volume discounts for law firms and corporations. Contact our sales team at sales@legalmy.com to discuss a custom plan tailored to your needs.</p>
+    </div>
+</div>
+
+<!-- Footer CTA -->
+<div class="footer-cta" style="margin-top: 80px;">
+    <h3>Ready to unlock your legal intelligence?</h3>
+    <p>Pay nothing for 14 days • Zero risk free trial • Switch or cancel anytime</p>
+    <a href="{{ url_for('auth.upgrade_plan', plan='research') }}" class="btn btn-primary" style="background-color: #B8973A; border-color: #B8973A; color: white; padding: 12px 40px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">Start My Free Trial</a>
+</div>
+
 <script>
 function toggleBilling(period) {
-    // Update button states
-    document.getElementById('monthly-btn').style.background = period === 'monthly' ? 'white' : 'transparent';
-    document.getElementById('monthly-btn').style.color = period === 'monthly' ? '#0D1B2A' : '#64748B';
-    document.getElementById('annual-btn').style.background = period === 'annual' ? 'white' : 'transparent';
-    document.getElementById('annual-btn').style.color = period === 'annual' ? '#0D1B2A' : '#64748B';
+    const monthlyBtn = document.getElementById('monthly-btn');
+    const annualBtn = document.getElementById('annual-btn');
 
-    // Show/hide annual prices (placeholder for now)
-    if (period === 'annual') {
-        // Would update prices here
+    if (period === 'monthly') {
+        monthlyBtn.classList.remove('inactive');
+        annualBtn.classList.add('inactive');
+    } else {
+        monthlyBtn.classList.add('inactive');
+        annualBtn.classList.remove('inactive');
     }
 }
 </script>
