@@ -58,7 +58,9 @@ def index():
             preferences=preferences
         )
     except Exception as e:
+        import traceback
         logger.error(f'Dashboard error: {e}')
+        logger.error(traceback.format_exc())
         flash('Failed to load dashboard', 'danger')
         return redirect(url_for('landing.index'))
 
